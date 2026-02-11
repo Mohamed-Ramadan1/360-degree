@@ -15,7 +15,7 @@ export class User {
   @Column({ type: 'varchar', length: 100, nullable: false })
   name: string;
 
-  @Index('idx_user_email', { unique: true })
+  @Index('idx_user_email')
   @Column({ type: 'varchar', length: 255, unique: true, nullable: false })
   email: string;
 
@@ -26,13 +26,9 @@ export class User {
   @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
   phoneNumber: string;
 
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP',
-  })
+  @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 }

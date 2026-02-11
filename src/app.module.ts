@@ -11,6 +11,7 @@ import { UsersModule } from './modules/users/users.module';
 
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { databaseConfig, appConfig, redisConfig, jwtConfig } from './config';
+import { LogsModule } from './logs/logs.module';
 // import { LogsModule } from './logs/logs.module';
 // import { LoggerService } from './logs/logger.service';
 
@@ -30,6 +31,7 @@ import { databaseConfig, appConfig, redisConfig, jwtConfig } from './config';
     }),
     AuthModule,
     UsersModule,
+    LogsModule,
 
     ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([
