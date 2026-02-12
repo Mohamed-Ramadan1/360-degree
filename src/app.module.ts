@@ -10,9 +10,11 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { databaseConfig, appConfig, redisConfig, jwtConfig } from './config';
+import { databaseConfig, appConfig, jwtConfig } from './config';
 import { LogsModule } from './logs/logs.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
+import { CommonModule } from './common/common.module';
+import { QueuesModule } from './queues/queues.module';
 // import { LogsModule } from './logs/logs.module';
 // import { LoggerService } from './logs/logger.service';
 
@@ -27,14 +29,15 @@ import { RedisModule } from './infrastructure/redis/redis.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, appConfig, redisConfig, jwtConfig],
+      load: [databaseConfig, appConfig, jwtConfig],
       envFilePath: ['.env.local', '.env'],
     }),
     AuthModule,
     UsersModule,
     LogsModule,
     RedisModule,
-
+    CommonModule,
+    QueuesModule,
     ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([
       {

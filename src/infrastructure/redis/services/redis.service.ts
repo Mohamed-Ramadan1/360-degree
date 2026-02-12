@@ -18,8 +18,8 @@ export class RedisService implements OnModuleDestroy, OnModuleInit {
 
   private initializeClient() {
     this.client = new Redis({
-      host: this.configService.get('redis.host'),
-      port: this.configService.get('redis.port'),
+      host: this.configService.get('REDIS_HOST'),
+      port: this.configService.get('REDIS_PORT'),
 
       // Connection pool settings
       maxRetriesPerRequest: 3,

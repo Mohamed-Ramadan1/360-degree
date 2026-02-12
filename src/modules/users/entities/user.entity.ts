@@ -22,9 +22,11 @@ export class User {
   @Column({ type: 'varchar', length: 255, nullable: false })
   password: string;
 
-  @Index('idx_user_phone')
-  @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
-  phoneNumber: string;
+  // @Index('idx_user_phone')
+  // @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
+  // phoneNumber: string;
+  @Column({ type: 'boolean', default: false })
+  isVerified: boolean;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
