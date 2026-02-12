@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString, Length } from 'class-validator';
 import { Transform } from 'class-transformer';
-export class CreateAuthDto {
+export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   @Transform(({ value }) => value?.trim().replace(/\s+/g, ' '))

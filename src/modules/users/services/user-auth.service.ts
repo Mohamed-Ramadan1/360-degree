@@ -34,4 +34,38 @@ export class UserAuthService {
       throw error;
     }
   }
+
+  async findByEmail(email: string): Promise<IUser> {
+    try {
+      const user = await this.userAuthRepository.findByEmail(email);
+      return user;
+    } catch (err: unknown) {
+      const error =
+        err instanceof Error
+          ? err
+          : new Error('Unknown error occurred while finding user by email');
+      this.logger.error(
+        `Error in UserAuthService.findByEmail: ${error.message}`,
+        error,
+        UserAuthService.name,
+      );
+      throw error;
+    }
+  }
+
+  async updateLastLogin(userId: string): Promise<void> {
+    try {
+      await this.userAuthRepository.updateUserLastLogin(userId);
+    } catch (err: unknown) {
+      const error =
+        err instanceof Error
+          ? err
+          : new Error('Unknown error occurred while updating last login');
+      this.logger.error(
+        `Error in UserAuthService.updateLastLogin: ${error.message}`,
+        error,
+        UserAuthService.name,
+      );
+    }
+  }
 }

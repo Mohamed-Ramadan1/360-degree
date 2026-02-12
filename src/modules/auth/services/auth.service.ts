@@ -1,6 +1,10 @@
-import { ConflictException, Injectable } from '@nestjs/common';
-import { CreateAuthDto } from '../dto/create-auth.dto';
-import { UpdateAuthDto } from '../dto/update-auth.dto';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { CreateUserDto } from '../dto/createUser-dto';
+import { LoginUserDto } from '../dto/loginUser-dto.ts';
 import { LoggerService } from 'src/logs/logger.service';
 import { PasswordHelperService } from 'src/common/services/password-helper.service';
 import { UserAuthService } from 'src/modules/users/services/user-auth.service';
@@ -9,6 +13,8 @@ import { TokenCreationService } from './token-creation.service';
 import { TokensTrackingService } from 'src/common/services/tokens-tracking-service.service';
 import { generateWelcomeEmail } from '../emails/templates/wellcomEmail';
 import { EmailQueueService } from 'src/queues/services/email-queue.service';
+import { IUser } from 'src/modules/users/interfaces/entities/user.interface';
+import { ITokenPair } from '../interfaces/tokens/tokenGeneration.interface';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +28,7 @@ export class AuthService {
     private readonly emailQueueService: EmailQueueService,
   ) {}
 
-  async signUp(userData: CreateAuthDto) {
+  async signUp(userData: CreateUserDto) {
     try {
       const hashedPassword: string =
         await this.passwordHelperService.hashPassword(userData.password);
@@ -69,6 +75,46 @@ export class AuthService {
         throw new ConflictException('Email already exists');
       }
       throw error;
+    }
+  }
+
+  async login(loginUserDto: LoginUserDto) {
+    try {
+      const user: IUser = await this.userAuthService.findByEmail(
+        loginUserDto.email,
+      );
+
+      const isPasswordValid: boolean =
+        await this.passwordHelperService.comparePasswords(
+          loginUserDto.password,
+          user.password,
+        );
+      if (!isPasswordValid)
+        throw new UnauthorizedException('Invalid credentials');
+
+      if (user.accountToBeDeleted) {
+        throw new UnauthorizedException(
+          'User account is scheduled for deletion. if you do not request this action please contact support immediately.',
+        );
+      }
+
+      const tokenPair: ITokenPair = this.tokenCreationService.generateTokenPair(
+        user.id,
+      );
+
+      await Promise.all([
+        this.userAuthService.updateLastLogin(user.id),
+        this.trackUserRefreshToken(user.id, tokenPair.refreshToken),
+      ]);
+
+      // Remove password before returning user object
+      user.password = '';
+
+      return { user, tokenPair };
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error('Unknown error');
+      this.logger.error('Error during login', err, AuthService.name);
+      throw err;
     }
   }
 

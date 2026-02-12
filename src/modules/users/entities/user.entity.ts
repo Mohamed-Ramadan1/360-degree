@@ -33,6 +33,15 @@ export class User implements IUser {
   @Column({ type: 'timestamptz', nullable: true }) // Use timestamptz for timezone awareness
   verifiedAt: Date;
 
+  @Column({ type: 'timestamptz', nullable: true })
+  lastLoginAt: Date | null;
+
+  @Column({ type: 'boolean', nullable: false, default: false })
+  accountToBeDeleted: boolean;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  toBeDeletedAt: Date | null;
+
   @Column({ type: 'boolean', nullable: false, default: false })
   isDisabled: boolean;
 

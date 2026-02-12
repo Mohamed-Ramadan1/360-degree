@@ -95,11 +95,11 @@ export class AuthGuard implements CanActivate {
     //   throw new UnauthorizedException('User account is inactive');
     // }
 
-    // if (user.accountToBeDeleted) {
-    //   throw new UnauthorizedException(
-    //     'User account is scheduled for deletion. if you do not request this action please contact support immediately.',
-    //   );
-    // }
+    if (user.accountToBeDeleted) {
+      throw new UnauthorizedException(
+        'User account is scheduled for deletion. if you do not request this action please contact support immediately.',
+      );
+    }
 
     if (user.isDisabled) {
       throw new UnauthorizedException(
