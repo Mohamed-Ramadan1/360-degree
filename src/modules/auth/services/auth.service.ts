@@ -134,6 +134,16 @@ export class AuthService {
     }
   }
 
+  async logout(userId: string) {
+    try {
+      await this.tokensTrackingService.revokeAllUserTokens(userId);
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error('Unknown error');
+      this.logger.error(`Failed to logout user ${userId}: ${err.message}`, err);
+      throw err;
+    }
+  }
+
   private async trackUserRefreshToken(userId: string, refreshToken: string) {
     try {
       await this.tokensTrackingService.trackRefreshToken(refreshToken, userId);

@@ -15,9 +15,11 @@ import { Throttle } from '@nestjs/throttler';
 import { SetRefreshCookieInterceptor } from '../interceptors/set-refresh-cookie.interceptor';
 import { TransformAuthResponseInterceptor } from '../interceptors/transform-auth-response.interceptor';
 import { Public } from 'src/common/decorators/public.decorator';
-// import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
+import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
 import { RefreshTokenGuard } from '../guards/refresh-token.guard';
-import { Request } from 'express';
+import { Request, response } from 'express';
+import { Protected } from 'src/common/decorators/protected.decorator';
+import { ClearRefreshCookieInterceptor } from '../interceptors/clear-refresh.cookie.interceptor';
 
 @Public()
 @Controller('auth')
@@ -57,5 +59,20 @@ export class AuthController {
       req.user,
     );
     return { message: 'new access token created', accessToken };
+  }
+
+  // @UseInterceptors(TransformResponseInterceptor)
+  // @Protected()
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @UseInterceptors(ClearRefreshCookieInterceptor)
+  @UseGuards(RefreshTokenGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('logout')
+  async logout(@Req() req: Request) {
+    const user = req.user;
+    await this.authService.logout(user.id);
+    return {
+      message: 'user logged out successfully.',
+    };
   }
 }
