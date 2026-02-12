@@ -118,6 +118,22 @@ export class AuthService {
     }
   }
 
+  generateNewAccessToken(user: IUser) {
+    try {
+      const tokenPair: ITokenPair = this.tokenCreationService.generateTokenPair(
+        user.id,
+      );
+      return tokenPair.accessToken;
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error('Unknown error');
+      this.logger.error(
+        `Failed to generate new access token for user ${user.id}: ${err.message}`,
+        err,
+      );
+      throw err;
+    }
+  }
+
   private async trackUserRefreshToken(userId: string, refreshToken: string) {
     try {
       await this.tokensTrackingService.trackRefreshToken(refreshToken, userId);
