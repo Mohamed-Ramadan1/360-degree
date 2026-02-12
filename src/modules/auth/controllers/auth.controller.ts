@@ -16,7 +16,9 @@ import { UpdateAuthDto } from '../dto/update-auth.dto';
 import { Throttle } from '@nestjs/throttler';
 import { SetRefreshCookieInterceptor } from '../interceptors/set-refresh-cookie.interceptor';
 import { TransformAuthResponseInterceptor } from '../interceptors/transform-auth-response.interceptor';
+import { Public } from 'src/common/decorators/public.decorator';
 
+@Public()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

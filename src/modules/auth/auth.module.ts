@@ -5,6 +5,7 @@ import { UserAuthService } from '../users/services/user-auth.service';
 import { TokenCreationService } from './services/token-creation.service';
 import { LoggerService } from 'src/logs/logger.service';
 import { UsersModule } from '../users/users.module';
+import { TokenValidationService } from './services/token-validation.service';
 
 @Module({
   imports: [forwardRef(() => UsersModule)],
@@ -14,6 +15,8 @@ import { UsersModule } from '../users/users.module';
     UserAuthService,
     TokenCreationService,
     LoggerService,
+    TokenValidationService,
   ],
+  exports: [TokenValidationService],
 })
 export class AuthModule {}

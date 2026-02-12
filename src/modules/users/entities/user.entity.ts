@@ -6,9 +6,10 @@ import {
   UpdateDateColumn,
   Index,
 } from 'typeorm';
+import { IUser } from '../interfaces/entities/user.interface';
 
 @Entity('users')
-export class User {
+export class User implements IUser {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -25,8 +26,15 @@ export class User {
   // @Index('idx_user_phone')
   // @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
   // phoneNumber: string;
-  @Column({ type: 'boolean', default: false })
+
+  @Column({ type: 'boolean', default: false, nullable: false })
   isVerified: boolean;
+
+  @Column({ type: 'timestamptz', nullable: true }) // Use timestamptz for timezone awareness
+  verifiedAt: Date;
+
+  @Column({ type: 'boolean', nullable: false, default: false })
+  isDisabled: boolean;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

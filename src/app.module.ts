@@ -1,7 +1,7 @@
 // Nest specific imports
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 // import { APP_GUARD, RouterModule, APP_FILTER } from '@nestjs/core'; ThrottlerGuard => gon be used later stage of the application
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -15,6 +15,9 @@ import { LogsModule } from './logs/logs.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
 import { CommonModule } from './common/common.module';
 import { QueuesModule } from './queues/queues.module';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { AllExceptionsFilter } from './common/filters/http-exception.filter';
+import { AuthGuard } from './common/guards/auth.guard';
 // import { LogsModule } from './logs/logs.module';
 // import { LoggerService } from './logs/logger.service';
 
@@ -77,18 +80,18 @@ import { QueuesModule } from './queues/queues.module';
   ],
   controllers: [],
   providers: [
-    // {
-    //   provide: APP_FILTER,
-    //   useClass: AllExceptionsFilter,
-    // },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: ThrottlerGuard,
-    // },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: AuthGuard,
-    // },
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
   ],
 })
 export class AppModule {}
