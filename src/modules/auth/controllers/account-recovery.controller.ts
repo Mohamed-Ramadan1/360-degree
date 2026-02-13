@@ -3,6 +3,7 @@ import {
   Controller,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   UseInterceptors,
 } from '@nestjs/common';
@@ -11,6 +12,7 @@ import { TransformResponseInterceptor } from 'src/common/interceptors/transform-
 import { Throttle } from '@nestjs/throttler';
 import { ForgotPasswordDto } from '../dto/forgot-password.dto';
 import { Public } from 'src/common/decorators/public.decorator';
+import { ResetPasswordDto } from '../dto/reset-password.dto';
 
 @Public()
 @Controller('recovery')
@@ -30,6 +32,25 @@ export class AccountRecoveryController {
     return {
       message:
         'If an account with that email exists, a password reset link has been sent.',
+    };
+  }
+
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('reset-password/:userId/:token')
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(
+    @Param('userId') userId: string,
+    @Param('token') token: string,
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ) {
+    await this.accountRecoveryService.resetPassword(
+      token,
+      resetPasswordDto.newPassword,
+      userId,
+    );
+
+    return {
+      message: 'Password has been reset successfully',
     };
   }
 }

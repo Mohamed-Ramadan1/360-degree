@@ -3,6 +3,7 @@ export interface IUser {
   name: string;
   email: string;
   password: string;
+  passwordLastChangedAt: Date;
   isVerified: boolean;
   lastLoginAt: Date | null;
   accountToBeDeleted: boolean;

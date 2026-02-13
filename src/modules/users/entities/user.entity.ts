@@ -23,6 +23,9 @@ export class User implements IUser {
   @Column({ type: 'varchar', length: 255, nullable: false })
   password: string;
 
+  @Column({ type: 'timestamptz', nullable: true })
+  passwordLastChangedAt: Date;
+
   // @Index('idx_user_phone')
   // @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
   // phoneNumber: string;

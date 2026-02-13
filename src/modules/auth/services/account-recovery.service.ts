@@ -1,9 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { LoggerService } from 'src/logs/logger.service';
 import { EmailQueueService } from 'src/queues/services/email-queue.service';
 import { VerificationTokensCreatorService } from 'src/common/services/verification-tokens-creator.service';
 import { UserAuthService } from 'src/modules/users/services/user-auth.service';
 import { generatePasswordResetEmail } from '../emails/templates/passwordResetEmail';
+import { PasswordHelperService } from 'src/common/services/password-helper.service';
+import { TokensTrackingService } from 'src/common/services/tokens-tracking-service.service';
+import { generatePasswordUpdatedEmail } from '../emails/templates/passwordChangeConfirmationEmail';
 
 @Injectable()
 export class AccountRecoveryService {
@@ -11,6 +14,8 @@ export class AccountRecoveryService {
     private readonly userAuthService: UserAuthService,
     private readonly verificationTokensCreator: VerificationTokensCreatorService,
     private readonly emailQueueService: EmailQueueService,
+    private readonly passwordHelperService: PasswordHelperService,
+    private readonly tokensTrackingService: TokensTrackingService,
     private readonly logger: LoggerService,
   ) {}
 
@@ -30,6 +35,7 @@ export class AccountRecoveryService {
       const resetPasswordEmail = generatePasswordResetEmail({
         userEmail: existingUser.email,
         userName: existingUser.name,
+        userId: existingUser.id,
         resetToken: token,
         expiresInMinutes: 15,
       });
@@ -44,6 +50,45 @@ export class AccountRecoveryService {
     } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error(String(err));
       this.logger.error('Error in sendPasswordResetEmail', error);
+      throw error;
+    }
+  }
+
+  async resetPassword(token: string, newPassword: string, userId: string) {
+    try {
+      const tokenKey = `reset-password-token-${userId}`;
+      const isTokenValid =
+        await this.verificationTokensCreator.validateVerificationToken(
+          tokenKey,
+          token,
+        );
+
+      if (!isTokenValid) {
+        throw new BadRequestException(
+          'Invalid or expired password reset token',
+        );
+      }
+      // Check if a user exists with this token
+      const user = await this.userAuthService.getUserById(userId);
+
+      const hashedPassword: string =
+        await this.passwordHelperService.hashPassword(newPassword);
+
+      await this.userAuthService.updateUserPassword(user.id, hashedPassword);
+      await this.tokensTrackingService.revokeAllUserTokens(user.id);
+      await this.emailQueueService.addEmailJob({
+        type: 'password-change-confirmation',
+        to: user.email,
+        subject: 'Password Change Confirmation',
+        text: `Your password has been changed successfully.`,
+        html: generatePasswordUpdatedEmail({
+          userEmail: user.email,
+          userName: user.name,
+        }),
+      });
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      this.logger.error('Error in resetPassword', error);
       throw error;
     }
   }

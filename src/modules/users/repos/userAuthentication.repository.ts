@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { LoggerService } from 'src/logs/logger.service';
 import { User } from '../entities/user.entity';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IUser } from '../interfaces/entities/user.interface';
 
@@ -46,6 +46,25 @@ export class UserAuthenticationRepository {
         error as Error,
         UserAuthenticationRepository.name,
       );
+    }
+  }
+
+  async findById(userId: string): Promise<IUser> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
+  async updateUserPassword(userId: string, newPassword: string): Promise<void> {
+    // Update the password and reset the token validation fields
+    const result: UpdateResult = await this.userRepository.update(userId, {
+      password: newPassword,
+      passwordLastChangedAt: new Date(),
+    });
+    if (result.affected === 0) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
     }
   }
 }

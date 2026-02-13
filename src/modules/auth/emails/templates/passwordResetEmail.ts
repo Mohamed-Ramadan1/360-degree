@@ -1,6 +1,7 @@
 interface PasswordResetEmailData {
   userEmail: string;
   userName: string;
+  userId: string;
   resetToken: string;
   expiresInMinutes?: number;
   platformUrl?: string;
@@ -21,7 +22,7 @@ export function generatePasswordResetEmail(
     companyName = '360-degree',
   } = data;
 
-  const resetUrl = `${platformUrl}/auth/recover/reset-password?token=${resetToken}`;
+  const resetUrl = `${platformUrl}/auth/recovery/reset-password/${data.userId}/${resetToken}`;
 
   return `
   <div style="background:#f4f6f9;padding:40px 0;font-family:Arial,sans-serif;">

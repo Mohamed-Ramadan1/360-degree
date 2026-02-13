@@ -9,8 +9,8 @@ import {
   Req,
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
-import { CreateUserDto } from '../dto/createUser-dto';
-import { LoginUserDto } from '../dto/loginUser-dto.ts';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { LoginUserDto } from '../dto/login-user.dto';
 import { Throttle } from '@nestjs/throttler';
 import { SetRefreshCookieInterceptor } from '../interceptors/set-refresh-cookie.interceptor';
 import { TransformAuthResponseInterceptor } from '../interceptors/transform-auth-response.interceptor';

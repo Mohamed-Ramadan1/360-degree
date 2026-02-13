@@ -3,8 +3,8 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CreateUserDto } from '../dto/createUser-dto';
-import { LoginUserDto } from '../dto/loginUser-dto.ts';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { LoginUserDto } from '../dto/login-user.dto';
 import { LoggerService } from 'src/logs/logger.service';
 import { PasswordHelperService } from 'src/common/services/password-helper.service';
 import { UserAuthService } from 'src/modules/users/services/user-auth.service';

@@ -68,4 +68,39 @@ export class UserAuthService {
       );
     }
   }
+
+  async getUserById(userId: string): Promise<IUser> {
+    try {
+      const user = await this.userAuthRepository.findById(userId);
+      return user;
+    } catch (err: unknown) {
+      const error =
+        err instanceof Error
+          ? err
+          : new Error('Unknown error occurred while finding user by ID');
+      this.logger.error(
+        `Error in UserAuthService.getUserById: ${error.message}`,
+        error,
+        UserAuthService.name,
+      );
+      throw error;
+    }
+  }
+
+  async updateUserPassword(userId: string, newPassword: string): Promise<void> {
+    try {
+      await this.userAuthRepository.updateUserPassword(userId, newPassword);
+    } catch (err: unknown) {
+      const error =
+        err instanceof Error
+          ? err
+          : new Error('Unknown error occurred while updating user password');
+      this.logger.error(
+        `Error in UserAuthService.updateUserPassword: ${error.message}`,
+        error,
+        UserAuthService.name,
+      );
+      throw error;
+    }
+  }
 }
