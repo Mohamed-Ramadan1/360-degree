@@ -20,7 +20,7 @@ export function generateWelcomeEmail(data: WelcomeEmailData): string {
     platformUrl = 'https://360-degree.com',
     supportEmail = 'support@360-degree.com',
     companyName = '360-degree',
-    verificationUrl = `${backendPlatformUrl}/auth/recovery/verify-email/${user.id}/token=${verificationToken}`,
+    verificationUrl = `${backendPlatformUrl}/auth/recovery/verify-email/${user.id}/${verificationToken}`,
   } = data;
 
   return `

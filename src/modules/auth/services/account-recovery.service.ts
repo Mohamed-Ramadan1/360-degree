@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { LoggerService } from 'src/logs/logger.service';
 import { EmailQueueService } from 'src/queues/services/email-queue.service';
 import { VerificationTokensCreatorService } from 'src/common/services/verification-tokens-creator.service';
@@ -7,6 +11,7 @@ import { generatePasswordResetEmail } from '../emails/templates/passwordResetEma
 import { PasswordHelperService } from 'src/common/services/password-helper.service';
 import { TokensTrackingService } from 'src/common/services/tokens-tracking-service.service';
 import { generatePasswordUpdatedEmail } from '../emails/templates/passwordChangeConfirmationEmail';
+import { generateCongratulationsEmail } from '../emails/templates/generateCongratulationsEmail';
 
 @Injectable()
 export class AccountRecoveryService {
@@ -89,6 +94,45 @@ export class AccountRecoveryService {
     } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error(String(err));
       this.logger.error('Error in resetPassword', error);
+      throw error;
+    }
+  }
+
+  async verifyEmail(token: string, userId: string) {
+    try {
+      const tokenKey = `verification-token-${userId}`;
+      const isTokenValid =
+        await this.verificationTokensCreator.validateVerificationToken(
+          tokenKey,
+          token,
+        );
+
+      if (!isTokenValid) {
+        throw new BadRequestException('Invalid or expired verification token');
+      }
+
+      const user = await this.userAuthService.getUserById(userId);
+      if (!user)
+        throw new NotFoundException(
+          'No user found with this id check the token validity or expiry',
+        );
+
+      if (user.isVerified) return;
+
+      await this.userAuthService.verifyUserEmail(user.id);
+
+      await this.emailQueueService.addEmailJob({
+        type: 'account-verification-success',
+        to: user.email,
+        subject: 'Account Verified Successfully',
+        text: `Your account has been verified successfully.`,
+        html: generateCongratulationsEmail({
+          userName: user.name,
+        }),
+      });
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      this.logger.error('Error in verifyEmail', error);
       throw error;
     }
   }

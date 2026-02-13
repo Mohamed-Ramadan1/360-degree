@@ -103,4 +103,21 @@ export class UserAuthService {
       throw error;
     }
   }
+
+  async verifyUserEmail(userId: string): Promise<void> {
+    try {
+      await this.userAuthRepository.verifyUserEmail(userId);
+    } catch (err: unknown) {
+      const error =
+        err instanceof Error
+          ? err
+          : new Error('Unknown error occurred while verifying user email');
+      this.logger.error(
+        `Error in UserAuthService.verifyUserEmail: ${error.message}`,
+        error,
+        UserAuthService.name,
+      );
+      throw error;
+    }
+  }
 }

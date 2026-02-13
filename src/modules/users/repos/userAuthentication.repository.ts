@@ -67,4 +67,15 @@ export class UserAuthenticationRepository {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
   }
+
+  async verifyUserEmail(userId: string): Promise<void> {
+    const result: UpdateResult = await this.userRepository.update(userId, {
+      isVerified: true,
+      verifiedAt: new Date(),
+    });
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+  }
 }

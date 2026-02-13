@@ -53,4 +53,18 @@ export class AccountRecoveryController {
       message: 'Password has been reset successfully',
     };
   }
+
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('verify-email/:userId/:token')
+  @HttpCode(HttpStatus.OK)
+  async verifyEmail(
+    @Param('token') token: string,
+    @Param('userId') userId: string,
+  ) {
+    await this.accountRecoveryService.verifyEmail(token, userId);
+
+    return {
+      message: 'Email has been verified successfully',
+    };
+  }
 }
