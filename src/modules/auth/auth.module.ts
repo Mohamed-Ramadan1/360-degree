@@ -6,16 +6,19 @@ import { TokenCreationService } from './services/token-creation.service';
 import { LoggerService } from 'src/logs/logger.service';
 import { UsersModule } from '../users/users.module';
 import { TokenValidationService } from './services/token-validation.service';
+import { AccountRecoveryController } from './controllers/account-recovery.controller';
+import { AccountRecoveryService } from './services/account-recovery.service';
 
 @Module({
   imports: [forwardRef(() => UsersModule)],
-  controllers: [AuthController],
+  controllers: [AuthController, AccountRecoveryController],
   providers: [
     AuthService,
     UserAuthService,
     TokenCreationService,
     LoggerService,
     TokenValidationService,
+    AccountRecoveryService,
   ],
   exports: [TokenValidationService],
 })

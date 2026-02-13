@@ -17,12 +17,12 @@ import { TransformAuthResponseInterceptor } from '../interceptors/transform-auth
 import { Public } from 'src/common/decorators/public.decorator';
 import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
 import { RefreshTokenGuard } from '../guards/refresh-token.guard';
-import { Request, response } from 'express';
+import { Request } from 'express';
 import { Protected } from 'src/common/decorators/protected.decorator';
 import { ClearRefreshCookieInterceptor } from '../interceptors/clear-refresh.cookie.interceptor';
 
 @Public()
-@Controller('auth')
+@Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -49,7 +49,7 @@ export class AuthController {
     return { user, tokenPair };
   }
 
-  // @UseInterceptors(TransformResponseInterceptor)
+  @UseInterceptors(TransformResponseInterceptor)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @UseGuards(RefreshTokenGuard)
   @Post('access-token')
@@ -61,8 +61,8 @@ export class AuthController {
     return { message: 'new access token created', accessToken };
   }
 
-  // @UseInterceptors(TransformResponseInterceptor)
   // @Protected()
+  @UseInterceptors(TransformResponseInterceptor)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @UseInterceptors(ClearRefreshCookieInterceptor)
   @UseGuards(RefreshTokenGuard)
