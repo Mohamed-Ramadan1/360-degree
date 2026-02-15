@@ -5,6 +5,7 @@ export interface IUser {
   password: string;
   passwordLastChangedAt: Date;
   isVerified: boolean;
+  verifiedAt: Date;
   lastLoginAt: Date | null;
   accountToBeDeleted: boolean;
   toBeDeletedAt: Date | null;

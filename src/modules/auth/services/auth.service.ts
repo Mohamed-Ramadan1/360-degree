@@ -3,8 +3,8 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CreateUserDto } from '../dto/create-user.dto';
-import { LoginUserDto } from '../dto/login-user.dto';
+import { CreateUserDto } from '../dtos/requests/create-user.dto';
+import { LoginUserDto } from '../dtos/requests/login-user.dto';
 import { LoggerService } from 'src/logs/logger.service';
 import { PasswordHelperService } from 'src/common/services/password-helper.service';
 import { UserAuthService } from 'src/modules/users/services/user-auth.service';
@@ -109,7 +109,6 @@ export class AuthService {
 
       // Remove password before returning user object
       user.password = '';
-
       return { user, tokenPair };
     } catch (error: unknown) {
       const err = error instanceof Error ? error : new Error('Unknown error');
