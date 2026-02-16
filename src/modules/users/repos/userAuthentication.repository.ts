@@ -4,6 +4,7 @@ import { User } from '../entities/user.entity';
 import { Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IUser } from '../interfaces/entities/user.interface';
+import { UserRoles } from 'src/common/consts';
 
 @Injectable()
 export class UserAuthenticationRepository {
@@ -77,5 +78,17 @@ export class UserAuthenticationRepository {
     if (result.affected === 0) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
+  }
+
+  async createUserWithRoles(userData: {
+    email: string;
+    name: string;
+    password: string;
+    roles?: UserRoles[];
+  }): Promise<User> {
+    return await this.userRepository.save({
+      ...userData,
+      roles: userData.roles ?? [UserRoles.USER],
+    });
   }
 }

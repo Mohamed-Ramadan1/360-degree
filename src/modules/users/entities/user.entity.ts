@@ -7,6 +7,7 @@ import {
   Index,
 } from 'typeorm';
 import { IUser } from '../interfaces/entities/user.interface';
+import { UserRoles } from 'src/common/consts';
 
 @Entity('users')
 export class User implements IUser {
@@ -26,9 +27,9 @@ export class User implements IUser {
   @Column({ type: 'timestamptz', nullable: true })
   passwordLastChangedAt: Date;
 
-  // @Index('idx_user_phone')
-  // @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
-  // phoneNumber: string;
+  @Index('idx_user_phone')
+  @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
+  phoneNumber: string;
 
   @Column({ type: 'boolean', default: false, nullable: false })
   isVerified: boolean;
@@ -47,6 +48,14 @@ export class User implements IUser {
 
   @Column({ type: 'boolean', nullable: false, default: false })
   isDisabled: boolean;
+
+  @Column({
+    type: 'enum',
+    enum: UserRoles,
+    array: true,
+    default: [UserRoles.USER],
+  })
+  roles: UserRoles[];
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

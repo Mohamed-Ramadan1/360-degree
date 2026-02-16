@@ -11,7 +11,7 @@ import {
 import { AccountRecoveryService } from '../services/account-recovery.service';
 import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
 import { Throttle } from '@nestjs/throttler';
-import { Public } from 'src/common/decorators/public.decorator';
+import { Public } from 'src/common/decorators';
 import {
   ForgotPasswordDto,
   OperationSuccessDto,

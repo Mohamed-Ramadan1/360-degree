@@ -4,7 +4,7 @@ import { AuthController } from './controllers/auth.controller';
 import { UserAuthService } from '../users/services/user-auth.service';
 import { TokenCreationService } from './services/token-creation.service';
 import { LoggerService } from 'src/logs/logger.service';
-import { UsersModule } from '../users/users.module';
+import { UsersModule } from '../index';
 import { TokenValidationService } from './services/token-validation.service';
 import { AccountRecoveryController } from './controllers/account-recovery.controller';
 import { AccountRecoveryService } from './services/account-recovery.service';

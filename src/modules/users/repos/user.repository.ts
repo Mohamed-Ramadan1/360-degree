@@ -27,15 +27,21 @@ export class UserRepository {
         'isVerified',
         'isDisabled',
         'isDisabled',
-        // 'roles',
+        'roles',
         'createdAt',
         'updatedAt',
-        // 'phoneNumber',
+        'phoneNumber',
         'accountToBeDeleted',
       ],
     });
 
     if (!user) throw new NotFoundException('No user match provided id');
     return user;
+  }
+
+  async findAll(): Promise<IUser[]> {
+    return await this.userRepository.find({
+      select: ['id', 'email', 'name', 'isVerified', 'createdAt'],
+    });
   }
 }

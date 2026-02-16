@@ -8,8 +8,7 @@ import {
 } from '@nestjs/common';
 import { TokenValidationService } from 'src/modules/auth/services/token-validation.service';
 import { Reflector } from '@nestjs/core';
-import { IS_PUBLIC_KEY } from 'src/common/decorators/public.decorator';
-import { IS_PROTECTED_KEY } from 'src/common/decorators/protected.decorator';
+import { IS_PUBLIC_KEY, IS_PROTECTED_KEY } from 'src/common/decorators';
 import { Request } from 'express';
 
 @Injectable()

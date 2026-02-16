@@ -6,8 +6,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 
 // Application modules imports
-import { AuthModule } from './modules/auth/auth.module';
-import { UsersModule } from './modules/users/users.module';
+import { AuthModule, UsersModule } from './modules';
 
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { databaseConfig, appConfig, jwtConfig } from './config';
@@ -17,7 +16,7 @@ import { CommonModule } from './common/common.module';
 import { QueuesModule } from './queues/queues.module';
 import { APP_FILTER, APP_GUARD, RouterModule } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
-import { AuthGuard } from './common/guards/auth.guard';
+import { AuthGuard } from './common/guards';
 // import { LogsModule } from './logs/logs.module';
 // import { LoggerService } from './logs/logger.service';
 
@@ -30,7 +29,10 @@ import { AuthGuard } from './common/guards/auth.guard';
 
 @Module({
   imports: [
-    RouterModule.register([{ path: 'auth', module: AuthModule }]),
+    RouterModule.register([
+      { path: 'auth', module: AuthModule },
+      { path: 'users', module: UsersModule },
+    ]),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [databaseConfig, appConfig, jwtConfig],

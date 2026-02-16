@@ -1,3 +1,5 @@
+import { UserRoles } from 'src/common/consts';
+
 export interface IUser {
   id: string;
   name: string;
@@ -7,6 +9,8 @@ export interface IUser {
   isVerified: boolean;
   verifiedAt: Date;
   lastLoginAt: Date | null;
+  roles: UserRoles[];
+  phoneNumber: string;
   accountToBeDeleted: boolean;
   toBeDeletedAt: Date | null;
   isDisabled: boolean;
