@@ -3,10 +3,11 @@ import { IUser } from '../interfaces/entities/user.interface';
 import { LoggerService } from 'src/logs/logger.service';
 import { UserAuthenticationRepository, UserRepository } from '../repos';
 import { ResourceCleanupQueueService } from 'src/queues/services/resource-cleanup.service';
-import { UpdateUserPasswordDto } from '../dto';
+import { UpdateUserPasswordDto, UpdateUserProfileDto } from '../dto';
 import { PasswordHelperService } from 'src/common/services/password-helper.service';
 import { EmailQueueService } from 'src/queues/services/email-queue.service';
 import { generatePasswordUpdatedEmail } from 'src/modules/auth/emails/templates/passwordChangeConfirmationEmail';
+import { UpdateProfileData } from '../interfaces/services/profileManagementService.interface';
 
 @Injectable()
 export class ProfileManagementService {
@@ -58,6 +59,38 @@ export class ProfileManagementService {
       throw error;
     }
   }
+
+  async updateProfile(
+    user: IUser,
+    updateProfileData: UpdateUserProfileDto,
+  ): Promise<void> {
+    try {
+      if (!updateProfileData.name && !updateProfileData.phoneNumber) {
+        throw new BadRequestException(
+          'At least one field (name or phone number) must be provided for update',
+        );
+      }
+      const updatedData: UpdateProfileData = {};
+      if (updateProfileData.name) {
+        updatedData.name = updateProfileData.name;
+      }
+      if (updateProfileData.phoneNumber) {
+        updatedData.phoneNumber = updateProfileData.phoneNumber;
+        updatedData.phoneNumberVerified = false;
+        updatedData.phoneNumberVerifiedAt = null;
+      }
+
+      await this.userRepository.updateUserProfile(user.id, updatedData);
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error('Unknown error');
+      this.logger.error(
+        `Failed to update profile for user ${user.id}: ${error.message}`,
+        error,
+      );
+      throw error;
+    }
+  }
+
   async updateProfileImage(
     user: IUser,
     imageInfo: { imageUrl: string; imageLocation: string },

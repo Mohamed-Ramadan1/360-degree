@@ -3,6 +3,7 @@ import { User } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IUser } from '../interfaces/entities/user.interface';
+import { UpdateProfileData } from '../interfaces/services/profileManagementService.interface';
 
 @Injectable()
 export class UserRepository {
@@ -62,5 +63,17 @@ export class UserRepository {
     });
     if (!user) throw new NotFoundException('No user match provided id');
     return user.password;
+  }
+
+  async updateUserProfile(
+    userId: string,
+    updateProfileData: UpdateProfileData,
+  ): Promise<void> {
+    const result = await this.userRepository.update(userId, {
+      ...updateProfileData,
+    });
+    if (result.affected === 0) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
   }
 }

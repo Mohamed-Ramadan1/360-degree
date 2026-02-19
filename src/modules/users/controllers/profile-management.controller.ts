@@ -23,7 +23,7 @@ import {
 } from '@nestjs/swagger';
 import { OperationSuccessDto } from 'src/modules/auth/dtos';
 import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
-import { UpdateUserPasswordDto } from '../dto';
+import { UpdateUserPasswordDto, UpdateUserProfileDto } from '../dto';
 
 @UseInterceptors(TransformResponseInterceptor)
 @ApiBearerAuth('JWT-auth')
@@ -81,6 +81,56 @@ export class ProfileManagementController {
     );
 
     return { message: 'Password updated successfully' };
+  }
+
+  @ApiOperation({
+    summary: 'Update User Profile',
+    description: 'Allows a user to update their profile information.',
+  })
+  @ApiOkResponse({
+    description: 'Profile updated successfully',
+    type: OperationSuccessDto,
+    example: { message: 'Profile updated successfully' },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiBody({
+    type: UpdateUserProfileDto,
+    description: 'Payload to update user profile information',
+    examples: {
+      updateProfile: {
+        summary: 'Update Profile Example',
+        value: {
+          name: 'John Doe',
+          phoneNumber: '+1234567890',
+        },
+      },
+      example: {
+        summary: 'Invalid Profile Example',
+        value: {
+          name: 'J',
+          phoneNumber: 'invalid-phone',
+        },
+      },
+    },
+  })
+  @Throttle({ default: { limit: 10, ttl: 600000 } })
+  @Patch('update-profile')
+  @HttpCode(HttpStatus.OK)
+  async updateProfile(
+    @Req() req: Request,
+    @Body() updateProfileDto: UpdateUserProfileDto,
+  ) {
+    await this.profileManagementService.updateProfile(
+      req.user,
+      updateProfileDto,
+    );
+
+    return { message: 'Profile updated successfully' };
   }
 
   @ApiOperation({

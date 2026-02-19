@@ -11,6 +11,8 @@ export interface IUser {
   lastLoginAt: Date | null;
   roles: UserRoles[];
   phoneNumber: string;
+  phoneNumberVerified: boolean;
+  phoneNumberVerifiedAt: Date | null;
   accountToBeDeleted: boolean;
   toBeDeletedAt: Date | null;
   isDisabled: boolean;

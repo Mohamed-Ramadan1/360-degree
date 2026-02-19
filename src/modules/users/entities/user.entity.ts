@@ -34,6 +34,12 @@ export class User implements IUser {
   phoneNumber: string;
 
   @Column({ type: 'boolean', default: false, nullable: false })
+  phoneNumberVerified: boolean;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  phoneNumberVerifiedAt: Date | null;
+
+  @Column({ type: 'boolean', default: false, nullable: false })
   isVerified: boolean;
 
   @Column({ type: 'timestamptz', nullable: true }) // Use timestamptz for timezone awareness
