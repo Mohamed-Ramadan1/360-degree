@@ -9,6 +9,8 @@ import {
 import { IUser } from '../interfaces/entities/user.interface';
 import { UserRoles } from 'src/common/consts';
 
+const defaultProfileImage =
+  'https://res.cloudinary.com/dsui5qi7x/image/upload/v1771461357/360-degree/uploads/1771461354544-test.jpg.jpg';
 @Entity('users')
 export class User implements IUser {
   @PrimaryGeneratedColumn('uuid')
@@ -56,6 +58,12 @@ export class User implements IUser {
     default: [UserRoles.USER],
   })
   roles: UserRoles[];
+
+  @Column({ type: 'text', nullable: false, default: defaultProfileImage }) // text for potentially long URLs
+  profileImage: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  profileImageKey: string | null;
 
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;

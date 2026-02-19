@@ -44,4 +44,14 @@ export class UserRepository {
       select: ['id', 'email', 'name', 'isVerified', 'createdAt'],
     });
   }
+
+  async updateUserProfileImage(
+    userId: string,
+    imageInfo: { imageUrl: string; imageLocation: string },
+  ): Promise<void> {
+    await this.userRepository.update(userId, {
+      profileImageKey: imageInfo.imageLocation,
+      profileImage: imageInfo.imageUrl,
+    });
+  }
 }

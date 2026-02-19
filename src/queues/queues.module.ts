@@ -12,15 +12,31 @@ import { EmailProcessor } from './processors/emails/email.processor';
 
 import { EmailSenderService } from 'src/common/services/email-sender.service';
 import { EmailQueueService } from './services/email-queue.service';
+import { ResourceCleanupQueueService } from './services/resource-cleanup.service';
+import { ResourceCleanupService } from 'src/common/services/resource-cleanup.service';
+import { ResourceCleanupProcessor } from './processors/resourceCleanup/resource-cleanup.processor';
 @Global()
 @Module({
   imports: [
     BullModule.forRoot(bullMQConfig),
     BullModule.registerQueue(emailQueueConfig),
-    // BullModule.registerQueue(resourceCleanupQueueConfig),
+    BullModule.registerQueue(resourceCleanupQueueConfig),
   ],
 
-  providers: [EmailProcessor, EmailSenderService, EmailQueueService],
-  exports: [EmailProcessor, BullModule, EmailQueueService],
+  providers: [
+    EmailProcessor,
+    EmailSenderService,
+    EmailQueueService,
+    ResourceCleanupProcessor,
+    ResourceCleanupService,
+    ResourceCleanupQueueService,
+  ],
+  exports: [
+    EmailProcessor,
+    EmailQueueService,
+    BullModule,
+    ResourceCleanupProcessor,
+    ResourceCleanupQueueService,
+  ],
 })
 export class QueuesModule {}

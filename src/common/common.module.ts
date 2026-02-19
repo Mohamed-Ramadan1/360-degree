@@ -5,6 +5,7 @@ import { VerificationTokensCreatorService } from './services/verification-tokens
 import { RedisModule } from '.././infrastructure/redis/redis.module';
 import { TokensTrackingService } from './services/tokens-tracking-service.service';
 import { PasswordHelperService } from './services/password-helper.service';
+import { ResourceCleanupService } from './services/resource-cleanup.service';
 
 @Global()
 @Module({
@@ -14,12 +15,14 @@ import { PasswordHelperService } from './services/password-helper.service';
     VerificationTokensCreatorService,
     TokensTrackingService,
     PasswordHelperService,
+    ResourceCleanupService,
   ],
   exports: [
     EmailSenderService,
     VerificationTokensCreatorService,
     TokensTrackingService,
     PasswordHelperService,
+    ResourceCleanupService,
   ],
 })
 export class CommonModule {}

@@ -6,6 +6,12 @@ declare global {
       user: IUser;
     }
   }
+  namespace Multer {
+    interface File {
+      path: string;
+      filename: string;
+    }
+  }
 }
 
 export {};
