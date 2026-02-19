@@ -35,7 +35,7 @@ export class UsersCrudService {
         await this.passwordHelperService.hashPassword(userData.password);
 
       const user = await this.userAuthRepository.createUserWithRoles({
-        email: userData.email.toLowerCase().trim(),
+        email: userData.email,
         name: userData.name,
         password: hashedPassword,
         roles: userData.roles,

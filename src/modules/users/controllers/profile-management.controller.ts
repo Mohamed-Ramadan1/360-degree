@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   HttpCode,
   HttpStatus,
@@ -15,12 +16,14 @@ import { multerOptions } from 'src/config/multer.config';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiBody,
   ApiOkResponse,
   ApiOperation,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { OperationSuccessDto } from 'src/modules/auth/dtos';
 import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
+import { UpdateUserPasswordDto } from '../dto';
 
 @UseInterceptors(TransformResponseInterceptor)
 @ApiBearerAuth('JWT-auth')
@@ -29,6 +32,56 @@ export class ProfileManagementController {
   constructor(
     private readonly profileManagementService: ProfileManagementService,
   ) {}
+
+  @ApiOperation({
+    summary: 'Update User Password',
+    description: 'Allows a user to update their account password securely.',
+  })
+  @ApiOkResponse({
+    description: 'Password updated successfully',
+    type: OperationSuccessDto,
+    example: { message: 'Password updated successfully' },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data or password requirements not met',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiBody({
+    type: UpdateUserPasswordDto,
+    description: 'Payload to update user password',
+    examples: {
+      updatePassword: {
+        summary: 'Update Password Example',
+        value: {
+          currentPassword: 'OldPassword123!',
+          newPassword: 'NewSecurePassword456@',
+        },
+      },
+      example: {
+        summary: 'Invalid Password Example',
+        value: {
+          currentPassword: 'WrongOldPassword',
+          newPassword: 'weak',
+        },
+      },
+    },
+  })
+  @Throttle({ default: { limit: 5, ttl: 600000 } })
+  @Patch('update-password')
+  @HttpCode(HttpStatus.OK)
+  async updatePassword(
+    @Req() req: Request,
+    @Body() updatePasswordDto: UpdateUserPasswordDto,
+  ) {
+    await this.profileManagementService.updatePassword(
+      req.user,
+      updatePasswordDto,
+    );
+
+    return { message: 'Password updated successfully' };
+  }
 
   @ApiOperation({
     summary: 'Update Profile Image',

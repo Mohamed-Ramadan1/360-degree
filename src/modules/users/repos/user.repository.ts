@@ -54,4 +54,13 @@ export class UserRepository {
       profileImage: imageInfo.imageUrl,
     });
   }
+
+  async getUserPassword(userId: string): Promise<string> {
+    const user: IUser | null = await this.userRepository.findOne({
+      where: { id: userId },
+      select: ['password'],
+    });
+    if (!user) throw new NotFoundException('No user match provided id');
+    return user.password;
+  }
 }
