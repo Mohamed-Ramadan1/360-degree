@@ -4,6 +4,7 @@ import {
   HttpCode,
   HttpStatus,
   Patch,
+  Post,
   Req,
   UploadedFile,
   UseInterceptors,
@@ -74,7 +75,7 @@ export class ProfileManagementController {
   async updatePassword(
     @Req() req: Request,
     @Body() updatePasswordDto: UpdateUserPasswordDto,
-  ) {
+  ): Promise<OperationSuccessDto> {
     await this.profileManagementService.updatePassword(
       req.user,
       updatePasswordDto,
@@ -155,7 +156,7 @@ export class ProfileManagementController {
   async updateProfileImage(
     @UploadedFile() uploadedImage: Express.Multer.File,
     @Req() req: Request,
-  ) {
+  ): Promise<OperationSuccessDto> {
     const cloudinaryImage = uploadedImage as Express.Multer.File & {
       path: string;
       filename: string;
@@ -167,6 +168,34 @@ export class ProfileManagementController {
 
     return {
       message: 'Profile image updated successfully',
+    };
+  }
+
+  @ApiOperation({
+    summary: 'Resend Primary Email Verification',
+    description:
+      "Resend the verification email to the user's primary email address.",
+  })
+  @ApiOkResponse({
+    description: 'Verification email resent successfully',
+    type: OperationSuccessDto,
+    example: { message: 'Verification email resent successfully' },
+  })
+  @ApiBadRequestResponse({
+    description: 'Unable to resend verification email',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @Throttle({ default: { limit: 5, ttl: 600000 } })
+  @Post('email-verification/resend')
+  @HttpCode(HttpStatus.OK)
+  async resendPrimaryEmailVerification(
+    @Req() req: Request,
+  ): Promise<OperationSuccessDto> {
+    await this.profileManagementService.resendVerificationEmail(req.user);
+    return {
+      message: 'Verification email resent successfully',
     };
   }
 }

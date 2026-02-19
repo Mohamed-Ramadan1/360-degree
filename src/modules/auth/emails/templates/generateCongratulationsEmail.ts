@@ -14,8 +14,6 @@ export function generateCongratulationsEmail(
     userName,
     platformUrl = 'http://localhost:3000/api/v1',
     supportEmail = 'support@360-degree.com',
-    marketplaceUrl = 'https://360-degree.com/marketplace',
-    communityUrl = 'https://360-degree.com/community',
     companyName = '360-degree',
   } = data;
 
@@ -55,44 +53,6 @@ export function generateCongratulationsEmail(
           <p style="margin:6px 0 0 0;color:#065f46;font-size:13px;">
             Activation Date: ${activationDate}
           </p>
-        </div>
-
-        <p style="color:#4b5563;font-size:14px;">
-          Here’s what you can do next:
-        </p>
-
-        <!-- Feature List -->
-        <div style="margin:20px 0;">
-          <p style="margin:8px 0;color:#111827;font-size:14px;">
-            • Explore the marketplace  
-          </p>
-          <p style="margin:8px 0;color:#111827;font-size:14px;">
-            • Connect with the community  
-          </p>
-          <p style="margin:8px 0;color:#111827;font-size:14px;">
-            • Discover curated products  
-          </p>
-        </div>
-
-        <!-- Primary CTA -->
-        <div style="text-align:center;margin:30px 0;">
-          <a href="${platformUrl}"
-             style="background:#2563eb;color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:600;font-size:14px;display:inline-block;">
-             Go to Dashboard
-          </a>
-        </div>
-
-        <!-- Secondary Links -->
-        <div style="text-align:center;margin-top:15px;">
-          <a href="${marketplaceUrl}"
-             style="color:#2563eb;text-decoration:none;font-size:14px;margin:0 10px;">
-             Marketplace
-          </a>
-          |
-          <a href="${communityUrl}"
-             style="color:#2563eb;text-decoration:none;font-size:14px;margin:0 10px;">
-             Community
-          </a>
         </div>
 
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:30px 0;" />

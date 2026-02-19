@@ -8,6 +8,8 @@ import { PasswordHelperService } from 'src/common/services/password-helper.servi
 import { EmailQueueService } from 'src/queues/services/email-queue.service';
 import { generatePasswordUpdatedEmail } from 'src/modules/auth/emails/templates/passwordChangeConfirmationEmail';
 import { UpdateProfileData } from '../interfaces/services/profileManagementService.interface';
+import { VerificationTokensCreatorService } from 'src/common/services/verification-tokens-creator.service';
+import { generateWelcomeEmail } from 'src/modules/auth/emails/templates/wellcomEmail';
 
 @Injectable()
 export class ProfileManagementService {
@@ -16,6 +18,7 @@ export class ProfileManagementService {
     private readonly userRepository: UserRepository,
     private readonly passwordHelperService: PasswordHelperService,
     private readonly userAuthRepository: UserAuthenticationRepository,
+    private readonly verificationTokensCreator: VerificationTokensCreatorService,
     private readonly emailQueueService: EmailQueueService,
     private readonly resourceCleanupService: ResourceCleanupQueueService,
   ) {}
@@ -108,6 +111,37 @@ export class ProfileManagementService {
       const error = err instanceof Error ? err : new Error('Unknown error');
       this.logger.error(
         `Failed to update profile image for user ${user.id}: ${error.message}`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  async resendVerificationEmail(user: IUser): Promise<void> {
+    try {
+      const tokenKey = `verification-token-${user.id}`;
+      const tokenValue: string =
+        await this.verificationTokensCreator.createVerificationToken(
+          tokenKey,
+          900,
+        );
+      const emailContent = generateWelcomeEmail({
+        user,
+        verificationToken: tokenValue,
+        tokenExpiryMinutes: 15,
+      });
+
+      await this.emailQueueService.addEmailJob({
+        type: 'welcome-email',
+        to: user.email,
+        subject: 'Welcome to 360-degree!',
+        text: 'Welcome to 360-degree!',
+        html: emailContent,
+      });
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error('Unknown error');
+      this.logger.error(
+        `Failed to resend verification email: ${error.message}`,
         error,
       );
       throw error;
