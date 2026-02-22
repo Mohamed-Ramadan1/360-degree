@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UserRoles } from 'src/common/consts';
 import { LoggerService } from 'src/logs/logger.service';
 import { EmailQueueService } from 'src/queues/services/email-queue.service';
 import { UserRolesRepository } from '../repos';
 import { generateNewRolesAddedEmail } from '../emails/generateNewRolesAddedEmail';
+import { generateRolesRemovedEmail } from '../emails/generateNewRolesRemovedEmail';
 
 @Injectable()
 export class RolesManagementService {
@@ -45,6 +46,46 @@ export class RolesManagementService {
         err,
       );
 
+      throw err;
+    }
+  }
+
+  async removeRoles(userId: string, roles: UserRoles[]): Promise<void> {
+    try {
+      const { user, isModified } = await this.userRolesRepository.removeRoles(
+        userId,
+        roles,
+      );
+
+      if (!isModified) {
+        this.logger.log(
+          `No roles were removed from user ${userId}. Current roles: ${user.roles.join(
+            ', ',
+          )}`,
+        );
+
+        throw new BadRequestException(
+          'No roles were removed from the user. User missing the role or you trying to remove the user role.',
+        );
+      }
+
+      // send email logic gon be here
+      await this.emailQueueService.addEmailJob({
+        type: 'roles-removed',
+        to: user.email,
+        subject: 'Roles Removed',
+        text: 'Your roles have been removed!',
+        html: generateRolesRemovedEmail({
+          userName: user.name,
+          removedRoles: roles,
+        }),
+      });
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      this.logger.error(
+        `Error removing roles from user ${userId}: ${err.message}`,
+        err,
+      );
       throw err;
     }
   }

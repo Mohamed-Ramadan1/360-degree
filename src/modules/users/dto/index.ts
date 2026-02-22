@@ -5,3 +5,4 @@ export { RetrievalUserResponseDto } from './response/retrieval-user-response.dto
 export { UpdateUserPasswordDto } from './requests/update-user-password.dto';
 export { UpdateUserProfileDto } from './requests/update-user-profile.dto';
 export { AssignRolesDto } from './requests/assign-roles.dto';
+export { RemovedRolesDto } from './requests/remove-roles.dto';

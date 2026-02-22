@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { RolesManagementService } from '../services/roles-management.service';
-import { AssignRolesDto } from '../dto';
+import { AssignRolesDto, RemovedRolesDto } from '../dto';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -86,6 +86,57 @@ export class RolesManagementController {
     await this.rolesManagementService.assignRoles(userId, assignRolesDto.roles);
     return {
       message: 'Roles assigned successfully',
+    };
+  }
+
+  @ApiOperation({
+    summary: 'Remove User Roles',
+    description: 'Removes specified roles from a specific user.',
+  })
+  @ApiOkResponse({
+    description: 'Roles removed successfully',
+    type: OperationSuccessDto,
+    example: { message: 'Roles removed successfully' },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid user ID supplied',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'ID of the user to remove roles from',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiBody({
+    type: RemovedRolesDto,
+    description: 'Payload to remove roles from a user',
+    examples: {
+      removeRoles: {
+        summary: 'Remove Roles Example',
+        value: {
+          roles: ['admin', 'moderator'],
+        },
+      },
+      example: {
+        summary: 'Invalid Remove Roles Example',
+        value: {
+          roles: ['invalidRole'],
+        },
+      },
+    },
+  })
+  @Throttle({ default: { limit: 50, ttl: 20000 } })
+  @Patch('remove-roles/:userId')
+  @HttpCode(HttpStatus.OK)
+  async removeRoles(
+    @Param('userId', new ParseUUIDPipe()) userId: string,
+    @Body() removeRolesDto: RemovedRolesDto,
+  ): Promise<OperationSuccessDto> {
+    await this.rolesManagementService.removeRoles(userId, removeRolesDto.roles);
+    return {
+      message: 'Roles removed successfully',
     };
   }
 }
