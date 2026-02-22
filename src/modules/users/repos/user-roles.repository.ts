@@ -69,6 +69,18 @@ export class UserRolesRepository {
     });
   }
 
+  async resetRoles(userId: string): Promise<void> {
+    await this.dataSource.transaction(async (manager) => {
+      const user: IUser | null = await manager.findOne(User, {
+        where: { id: userId },
+      });
+      if (!user) throw new NotFoundException('No user match provided id.');
+
+      user.roles = [UserRoles.USER];
+      await manager.save(user);
+    });
+  }
+
   private async getUserById(
     userId: string,
     manager: EntityManager,

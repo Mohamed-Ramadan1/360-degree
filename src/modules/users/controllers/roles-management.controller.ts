@@ -139,4 +139,36 @@ export class RolesManagementController {
       message: 'Roles removed successfully',
     };
   }
+
+  @ApiOperation({
+    summary: 'Reset User Roles',
+    description: 'Resets all roles assigned to a specific user.',
+  })
+  @ApiOkResponse({
+    description: 'Roles reset successfully',
+    type: OperationSuccessDto,
+    example: { message: 'Roles reset successfully' },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid user ID supplied',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'ID of the user to reset roles for',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @Throttle({ default: { limit: 20, ttl: 30000 } })
+  @Patch('reset-roles/:userId')
+  @HttpCode(HttpStatus.OK)
+  async resetRoles(
+    @Param('userId', new ParseUUIDPipe()) userId: string,
+  ): Promise<OperationSuccessDto> {
+    await this.rolesManagementService.resetRoles(userId);
+    return {
+      message: 'Roles reset successfully',
+    };
+  }
 }

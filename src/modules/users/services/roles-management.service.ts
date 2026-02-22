@@ -89,4 +89,17 @@ export class RolesManagementService {
       throw err;
     }
   }
+
+  async resetRoles(userId: string): Promise<void> {
+    try {
+      await this.userRolesRepository.resetRoles(userId);
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      this.logger.error(
+        `Error resetting roles for user ${userId}: ${err.message}`,
+        err,
+      );
+      throw err;
+    }
+  }
 }
