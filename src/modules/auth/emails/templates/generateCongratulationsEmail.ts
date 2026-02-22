@@ -17,7 +17,7 @@ export function generateCongratulationsEmail(
     companyName = '360-degree',
   } = data;
 
-  const activationDate = new Date().toLocaleDateString('ar-EG', {
+  const activationDate = new Date().toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

@@ -19,7 +19,7 @@ export function generatePasswordUpdatedEmail(
     companyName = '360-degree',
   } = data;
 
-  const updateTimeFormatted = updateTime.toLocaleString('ar-EG', {
+  const updateTimeFormatted = updateTime.toLocaleString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
