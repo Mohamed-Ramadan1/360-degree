@@ -6,3 +6,5 @@ export { UpdateUserPasswordDto } from './requests/update-user-password.dto';
 export { UpdateUserProfileDto } from './requests/update-user-profile.dto';
 export { AssignRolesDto } from './requests/assign-roles.dto';
 export { RemovedRolesDto } from './requests/remove-roles.dto';
+export { BulkRolesAssignDto } from './requests/bulk-roles-assign.dto';
+export { BulkRolesAssignResponseDto } from './response/bulk-roles-assign.dto';

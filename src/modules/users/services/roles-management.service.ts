@@ -102,4 +102,38 @@ export class RolesManagementService {
       throw err;
     }
   }
+
+  async bulkAssignRoles(
+    userIds: string[],
+    roles: UserRoles[],
+  ): Promise<{
+    success: boolean;
+    updated: number;
+    skipped: number;
+    details: {
+      updatedUserIds: string[];
+      skippedUserIds: string[];
+    };
+  }> {
+    try {
+      const { success, updated, skipped, details } =
+        await this.userRolesRepository.bulkAssignRoles(userIds, roles);
+
+      if (!success) {
+        this.logger.log(
+          `No roles were assigned to the provided users: ${userIds.join(', ')}`,
+        );
+        return { success, updated, skipped, details };
+      }
+
+      this.logger.log(
+        `Successfully assigned roles to users: ${userIds.join(', ')}`,
+      );
+      return { success, updated, skipped, details };
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      this.logger.error(`Error assigning roles to users: ${err.message}`, err);
+      throw err;
+    }
+  }
 }

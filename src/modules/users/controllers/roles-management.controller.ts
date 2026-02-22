@@ -11,7 +11,12 @@ import {
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { RolesManagementService } from '../services/roles-management.service';
-import { AssignRolesDto, RemovedRolesDto } from '../dto';
+import {
+  AssignRolesDto,
+  BulkRolesAssignDto,
+  BulkRolesAssignResponseDto,
+  RemovedRolesDto,
+} from '../dto';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -169,6 +174,72 @@ export class RolesManagementController {
     await this.rolesManagementService.resetRoles(userId);
     return {
       message: 'Roles reset successfully',
+    };
+  }
+
+  @ApiOperation({
+    summary: 'Bulk Assign Roles',
+    description: 'Assigns specified roles to multiple users in bulk.',
+  })
+  @ApiOkResponse({
+    description: 'Roles assigned successfully',
+    type: BulkRolesAssignResponseDto,
+    example: {
+      message: 'Roles assigned successfully',
+      success: true,
+      skipped: 2,
+      updated: 5,
+      details: {
+        updatedUserIds: ['user1', 'user2'],
+        skippedUserIds: ['user3'],
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiBody({
+    type: BulkRolesAssignDto,
+    description: 'Payload to bulk assign roles to users',
+    examples: {
+      bulkAssign: {
+        summary: 'Bulk Assign Roles Example',
+        value: {
+          users: ['user1', 'user2', 'user3'],
+          roles: ['admin', 'moderator'],
+        },
+      },
+      example: {
+        summary: 'Invalid Bulk Assign Example',
+        value: {
+          users: [],
+          roles: ['invalidRole'],
+        },
+      },
+    },
+  })
+  @Throttle({ default: { limit: 20, ttl: 30000 } })
+  @Patch('bulk-assign')
+  @HttpCode(HttpStatus.OK)
+  async bulkAssignRoles(
+    @Body() bulkRolesAssignDto: BulkRolesAssignDto,
+  ): Promise<BulkRolesAssignResponseDto> {
+    const { skipped, success, updated, details } =
+      await this.rolesManagementService.bulkAssignRoles(
+        bulkRolesAssignDto.users,
+        bulkRolesAssignDto.roles,
+      );
+    return {
+      message: success
+        ? 'Roles assigned successfully'
+        : 'No roles were assigned',
+      skipped,
+      success,
+      updated,
+      details,
     };
   }
 }

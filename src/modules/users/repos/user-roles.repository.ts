@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import { DataSource, EntityManager, In, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRoles } from 'src/common/consts/roles';
@@ -79,6 +79,90 @@ export class UserRolesRepository {
       user.roles = [UserRoles.USER];
       await manager.save(user);
     });
+  }
+
+  async bulkAssignRoles(
+    userIds: string[],
+    rolesToAdd: UserRoles[],
+  ): Promise<{
+    success: boolean;
+    updated: number;
+    skipped: number;
+    details: {
+      updatedUserIds: string[];
+      skippedUserIds: string[];
+    };
+  }> {
+    const isValid = this.validateUserRoleExistence(rolesToAdd);
+    if (!isValid) {
+      return {
+        success: false,
+        updated: 0,
+        skipped: userIds.length,
+        details: {
+          updatedUserIds: [],
+          skippedUserIds: userIds,
+        },
+      };
+    }
+
+    return await this.dataSource.transaction(async (manager) => {
+      // Step 1: Fetch all users
+      const users = await this.getUsersByIds(userIds, manager);
+
+      // Step 2: Validate all users exist (strict validation)
+      if (users.length !== userIds.length) {
+        const foundIds = new Set(users.map((u) => u.id));
+        const missing = userIds.filter((id) => !foundIds.has(id));
+        throw new NotFoundException(`Users not found: ${missing.join(', ')}`);
+      }
+
+      // Step 3: Categorize users
+      const usersToUpdate: User[] = [];
+      const skippedUserIds: string[] = [];
+
+      for (const user of users) {
+        const currentRoles = user.roles ?? [];
+
+        // Check if user needs ANY of the roles
+        const newRoles = rolesToAdd.filter(
+          (role) => !currentRoles.includes(role),
+        );
+
+        if (newRoles.length > 0) {
+          user.roles = [...currentRoles, ...newRoles];
+          usersToUpdate.push(user);
+        } else {
+          skippedUserIds.push(user.id);
+        }
+      }
+
+      // Step 4: Bulk save if there are updates
+      if (usersToUpdate.length > 0) {
+        await manager.save(usersToUpdate);
+      }
+
+      return {
+        success: true,
+        updated: usersToUpdate.length,
+        skipped: skippedUserIds.length,
+        details: {
+          updatedUserIds: usersToUpdate.map((u) => u.id),
+          skippedUserIds,
+        },
+      };
+    });
+  }
+
+  private async getUsersByIds(
+    userIds: string[],
+    manager: EntityManager,
+  ): Promise<IUser[]> {
+    const ids = [...new Set(userIds)];
+    const users = await manager.find(User, {
+      where: { id: In(ids) },
+    });
+    return users;
   }
 
   private async getUserById(
