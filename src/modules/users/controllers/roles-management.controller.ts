@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
@@ -18,6 +19,7 @@ import {
   BulkRolesRemoveDto,
   BulkRolesRemoveResponseDto,
   RemovedRolesDto,
+  RetrieveUserRolesResponseDto,
 } from '../dto';
 import {
   ApiBadRequestResponse,
@@ -288,7 +290,9 @@ export class RolesManagementController {
   @Throttle({ default: { limit: 20, ttl: 30000 } })
   @Patch('bulk-remove')
   @HttpCode(HttpStatus.OK)
-  async bulkRemoveRoles(@Body() bulkRolesRemoveDto: BulkRolesRemoveDto) {
+  async bulkRemoveRoles(
+    @Body() bulkRolesRemoveDto: BulkRolesRemoveDto,
+  ): Promise<BulkRolesRemoveResponseDto> {
     const { success, updated, notFound } =
       await this.rolesManagementService.bulkRemoveRoles(
         bulkRolesRemoveDto.users,
@@ -299,6 +303,41 @@ export class RolesManagementController {
       success,
       updated,
       notFound,
+    };
+  }
+
+  @ApiOperation({
+    summary: 'Get User Roles',
+    description: 'Retrieves all roles assigned to a specific user.',
+  })
+  @ApiOkResponse({
+    description: 'User roles retrieved successfully',
+    type: RetrieveUserRolesResponseDto,
+    example: {
+      message: 'User roles retrieved successfully',
+      roles: ['admin', 'user'],
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid user ID supplied',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'ID of the user to retrieve roles for',
+    example: 'user123',
+  })
+  @Get(':userId/roles')
+  @HttpCode(HttpStatus.OK)
+  async getUserRoles(
+    @Param('userId') userId: string,
+  ): Promise<RetrieveUserRolesResponseDto & OperationSuccessDto> {
+    const roles = await this.rolesManagementService.getUserRoles(userId);
+    return {
+      message: 'User roles retrieved successfully',
+      roles,
     };
   }
 }

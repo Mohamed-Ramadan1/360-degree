@@ -168,4 +168,20 @@ export class RolesManagementService {
       throw err;
     }
   }
+
+  async getUserRoles(userId: string): Promise<UserRoles[]> {
+    try {
+      const roles: UserRoles[] =
+        await this.userRolesRepository.getUserRoles(userId);
+
+      return roles;
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      this.logger.error(
+        `Error retrieving roles for user ${userId}: ${err.message}`,
+        err,
+      );
+      throw err;
+    }
+  }
 }

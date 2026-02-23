@@ -217,6 +217,15 @@ export class UserRolesRepository {
     });
   }
 
+  async getUserRoles(userId: string): Promise<UserRoles[]> {
+    const user: IUser | null = await this.userRepository.findOne({
+      where: { id: userId },
+      select: ['roles'],
+    });
+    if (!user) throw new NotFoundException('No user match provided id');
+    return user.roles;
+  }
+
   private async getUsersByIds(
     userIds: string[],
     manager: EntityManager,
