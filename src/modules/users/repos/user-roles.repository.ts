@@ -20,6 +20,19 @@ export class UserRolesRepository {
     return await this.dataSource.transaction(async (manager) => {
       const user = await this.getUserById(userId, manager);
 
+      const hasUserRole = this.hasUserRole(roles);
+
+      if (hasUserRole) {
+        roles = roles.filter((role) => role !== UserRoles.USER);
+      }
+      if (roles.length === 0) {
+        return {
+          user: user,
+          addedRoles: [],
+          isModified: false,
+        };
+      }
+
       // have roles check to prevent extra db call
       const currentRoles = user.roles ?? [];
       const newRoles = roles.filter((role) => !currentRoles.includes(role));
@@ -47,11 +60,22 @@ export class UserRolesRepository {
   }> {
     return await this.dataSource.transaction(async (manager) => {
       const user = await this.getUserById(userId, manager);
-      const userRoleExist = this.validateUserRoleExistence(roles);
+      const userRoleExist = this.hasUserRole(roles);
       const currentRoles = user.roles ?? [];
+      if (userRoleExist) {
+        roles = roles.filter((role) => role !== UserRoles.USER);
+      }
+      if (roles.length === 0) {
+        return {
+          user: user,
+          remainRoles: currentRoles,
+          isModified: false,
+        };
+      }
+
       const userHasRole = roles.every((role) => currentRoles.includes(role));
 
-      if (!userHasRole || userRoleExist) {
+      if (!userHasRole) {
         return { user, remainRoles: currentRoles, isModified: false };
       }
 
@@ -93,8 +117,12 @@ export class UserRolesRepository {
       skippedUserIds: string[];
     };
   }> {
-    const isValid = this.validateUserRoleExistence(rolesToAdd);
-    if (!isValid) {
+    const hasUserRole = this.hasUserRole(rolesToAdd);
+    if (hasUserRole) {
+      rolesToAdd = rolesToAdd.filter((role) => role !== UserRoles.USER);
+    }
+
+    if (rolesToAdd.length === 0) {
       return {
         success: false,
         updated: 0,
@@ -105,7 +133,6 @@ export class UserRolesRepository {
         },
       };
     }
-
     return await this.dataSource.transaction(async (manager) => {
       // Step 1: Fetch all users
       const users = await this.getUsersByIds(userIds, manager);
@@ -158,12 +185,16 @@ export class UserRolesRepository {
     userIds: string[],
     rolesToRemove: UserRoles[],
   ): Promise<{ success: boolean; updated: number; notFound: string[] }> {
-    const isValid = this.validateUserRoleExistence(rolesToRemove);
-    if (!isValid) {
+    const hasUserRole = this.hasUserRole(rolesToRemove);
+    if (hasUserRole) {
+      rolesToRemove = rolesToRemove.filter((role) => role !== UserRoles.USER);
+    }
+
+    if (rolesToRemove.length === 0) {
       return {
         success: false,
         updated: 0,
-        notFound: userIds,
+        notFound: [],
       };
     }
 
@@ -252,7 +283,7 @@ export class UserRolesRepository {
     return user;
   }
 
-  private validateUserRoleExistence(roles: UserRoles[]): boolean {
+  private hasUserRole(roles: UserRoles[]): boolean {
     return roles.includes(UserRoles.USER);
   }
 }

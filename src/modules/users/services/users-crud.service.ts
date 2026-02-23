@@ -15,6 +15,7 @@ import { EmailQueueService } from 'src/queues';
 
 // repository imports
 import { UserAuthenticationRepository, UserRepository } from '../repos';
+import { UserRoles } from 'src/common/consts';
 
 @Injectable()
 export class UsersCrudService {
@@ -33,6 +34,8 @@ export class UsersCrudService {
     try {
       const hashedPassword: string =
         await this.passwordHelperService.hashPassword(userData.password);
+
+      this.ensureUserHasUserRole(userData.roles);
 
       const user = await this.userAuthRepository.createUserWithRoles({
         email: userData.email,
@@ -96,6 +99,12 @@ export class UsersCrudService {
       const err = error instanceof Error ? error : new Error(String(error));
       this.logger.error(`Error listing users: ${err.message}`, err);
       throw err;
+    }
+  }
+
+  private ensureUserHasUserRole(roles: UserRoles[]) {
+    if (!roles.includes(UserRoles.USER)) {
+      roles.push(UserRoles.USER);
     }
   }
 }
