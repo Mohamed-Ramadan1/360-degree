@@ -8,3 +8,5 @@ export { AssignRolesDto } from './requests/assign-roles.dto';
 export { RemovedRolesDto } from './requests/remove-roles.dto';
 export { BulkRolesAssignDto } from './requests/bulk-roles-assign.dto';
 export { BulkRolesAssignResponseDto } from './response/bulk-roles-assign.dto';
+export { BulkRolesRemoveDto } from './requests/bulk-roles-remove.dto';
+export { BulkRolesRemoveResponseDto } from './response/bulk-roles-remove.dto';

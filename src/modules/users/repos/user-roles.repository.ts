@@ -154,6 +154,69 @@ export class UserRolesRepository {
     });
   }
 
+  async bulkRemoveRoles(
+    userIds: string[],
+    rolesToRemove: UserRoles[],
+  ): Promise<{ success: boolean; updated: number; notFound: string[] }> {
+    const isValid = this.validateUserRoleExistence(rolesToRemove);
+    if (!isValid) {
+      return {
+        success: false,
+        updated: 0,
+        notFound: userIds,
+      };
+    }
+
+    return await this.dataSource.transaction(async (manager) => {
+      const ids = [...new Set(userIds)];
+      const users = await manager.find(User, {
+        where: { id: In(ids) },
+        select: ['id', 'roles'],
+      });
+
+      const foundIds = new Set(users.map((u) => u.id));
+      const notFoundIds = userIds.filter((id) => !foundIds.has(id));
+
+      if (notFoundIds.length > 0) {
+        throw new NotFoundException(
+          `Users not found: ${notFoundIds.join(', ')}`,
+        );
+      }
+
+      // Filter and update roles in memory
+      const usersToUpdate: User[] = [];
+      const skippedUserIds: string[] = [];
+
+      for (const user of users) {
+        const currentRoles = user.roles || [];
+
+        const remainingRoles = currentRoles.filter(
+          (role) => !rolesToRemove.includes(role),
+        );
+
+        // Check if anything changed
+        if (remainingRoles.length !== currentRoles.length) {
+          user.roles = remainingRoles;
+          usersToUpdate.push(user);
+        } else {
+          // User didn't have any of the roles to remove
+          skippedUserIds.push(user.id);
+        }
+      }
+
+      // Bulk save if there are updates
+      if (usersToUpdate.length > 0) {
+        await manager.save(User, usersToUpdate);
+      }
+
+      return {
+        success: true,
+        updated: usersToUpdate.length,
+        notFound: notFoundIds,
+      };
+    });
+  }
+
   private async getUsersByIds(
     userIds: string[],
     manager: EntityManager,

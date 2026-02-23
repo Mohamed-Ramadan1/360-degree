@@ -136,4 +136,36 @@ export class RolesManagementService {
       throw err;
     }
   }
+
+  async bulkRemoveRoles(
+    userIds: string[],
+    roles: UserRoles[],
+  ): Promise<{
+    success: boolean;
+    updated: number;
+    notFound: string[];
+  }> {
+    try {
+      const { success, notFound, updated } =
+        await this.userRolesRepository.bulkRemoveRoles(userIds, roles);
+
+      if (!success) {
+        this.logger.log(
+          `No roles were removed from the provided users: ${userIds.join(
+            ', ',
+          )}`,
+        );
+        return { success, notFound, updated };
+      }
+
+      this.logger.log(
+        `Successfully removed roles from users: ${userIds.join(', ')}`,
+      );
+      return { success, notFound, updated };
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      this.logger.error(`Error removing roles for users: ${err.message}`, err);
+      throw err;
+    }
+  }
 }

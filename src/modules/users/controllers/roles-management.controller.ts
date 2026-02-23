@@ -15,6 +15,8 @@ import {
   AssignRolesDto,
   BulkRolesAssignDto,
   BulkRolesAssignResponseDto,
+  BulkRolesRemoveDto,
+  BulkRolesRemoveResponseDto,
   RemovedRolesDto,
 } from '../dto';
 import {
@@ -240,6 +242,63 @@ export class RolesManagementController {
       success,
       updated,
       details,
+    };
+  }
+
+  @ApiOperation({
+    summary: 'Bulk Remove Roles',
+    description: 'Removes specified roles from multiple users in bulk.',
+  })
+  @ApiOkResponse({
+    description: 'Roles removed successfully',
+    type: BulkRolesRemoveResponseDto,
+    example: {
+      message: 'Roles removed successfully',
+      success: true,
+      updated: 5,
+      notFound: ['user3', 'user4'],
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiBody({
+    type: BulkRolesRemoveDto,
+    description: 'Payload to bulk remove roles from users',
+    examples: {
+      bulkRemove: {
+        summary: 'Bulk Remove Roles Example',
+        value: {
+          users: ['user1', 'user2', 'user3'],
+          roles: ['admin', 'support_agent'],
+        },
+      },
+      example: {
+        summary: 'Invalid Bulk Remove Example',
+        value: {
+          users: [],
+          roles: ['invalidRole'],
+        },
+      },
+    },
+  })
+  @Throttle({ default: { limit: 20, ttl: 30000 } })
+  @Patch('bulk-remove')
+  @HttpCode(HttpStatus.OK)
+  async bulkRemoveRoles(@Body() bulkRolesRemoveDto: BulkRolesRemoveDto) {
+    const { success, updated, notFound } =
+      await this.rolesManagementService.bulkRemoveRoles(
+        bulkRolesRemoveDto.users,
+        bulkRolesRemoveDto.roles,
+      );
+    return {
+      message: success ? 'Roles removed successfully' : 'No roles were removed',
+      success,
+      updated,
+      notFound,
     };
   }
 }
