@@ -5,9 +5,10 @@ import { Repository, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IUser } from '../interfaces/entities/user.interface';
 import { UserRoles } from 'src/common/consts';
+import { IUserAuthenticationRepository } from '../interfaces';
 
 @Injectable()
-export class UserAuthenticationRepository {
+export class UserAuthenticationRepository implements IUserAuthenticationRepository {
   constructor(
     private readonly loggerService: LoggerService,
 

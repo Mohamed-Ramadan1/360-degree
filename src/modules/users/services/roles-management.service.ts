@@ -5,9 +5,10 @@ import { EmailQueueService } from 'src/queues/services/email-queue.service';
 import { UserRolesRepository } from '../repos';
 import { generateNewRolesAddedEmail } from '../emails/generateNewRolesAddedEmail';
 import { generateRolesRemovedEmail } from '../emails/generateNewRolesRemovedEmail';
+import { IRolesManagementService } from '../interfaces';
 
 @Injectable()
-export class RolesManagementService {
+export class RolesManagementService implements IRolesManagementService {
   constructor(
     private readonly userRolesRepository: UserRolesRepository,
     private readonly emailQueueService: EmailQueueService,

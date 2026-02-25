@@ -1,9 +1,12 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { RedisService } from '../../infrastructure/redis/services/redis.service';
 import { LoggerService } from 'src/logs/logger.service';
+import { ITokensTrackingService } from '../interfaces/tokensTrackingService';
 
 @Injectable()
-export class TokensTrackingService implements OnModuleDestroy, OnModuleInit {
+export class TokensTrackingService
+  implements ITokensTrackingService, OnModuleDestroy, OnModuleInit
+{
   constructor(
     private readonly redisService: RedisService,
     private readonly logger: LoggerService,

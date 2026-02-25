@@ -4,9 +4,10 @@ import { User } from '../entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRoles } from 'src/common/consts/roles';
 import { IUser } from '../interfaces/entities/user.interface';
+import { IUserRolesRepository } from '../interfaces';
 
 @Injectable()
-export class UserRolesRepository {
+export class UserRolesRepository implements IUserRolesRepository {
   constructor(
     private readonly dataSource: DataSource,
     @InjectRepository(User)

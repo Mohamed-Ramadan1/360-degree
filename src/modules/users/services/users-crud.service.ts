@@ -16,9 +16,10 @@ import { EmailQueueService } from 'src/queues';
 // repository imports
 import { UserAuthenticationRepository, UserRepository } from '../repos';
 import { UserRoles } from 'src/common/consts';
+import { IUserCrudService } from '../interfaces';
 
 @Injectable()
-export class UsersCrudService {
+export class UsersCrudService implements IUserCrudService {
   private tokenKeyPrefix = 'verification-token-';
 
   constructor(

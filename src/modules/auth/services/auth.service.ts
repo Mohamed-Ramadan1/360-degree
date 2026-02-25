@@ -15,9 +15,10 @@ import { generateWelcomeEmail } from '../emails/templates/wellcomEmail';
 import { EmailQueueService } from 'src/queues/services/email-queue.service';
 import { IUser } from 'src/modules/users/interfaces/entities/user.interface';
 import { ITokenPair } from '../interfaces/tokens/tokenGeneration.interface';
+import { IAuthService } from '../interfaces/services/authService.interface';
 
 @Injectable()
-export class AuthService {
+export class AuthService implements IAuthService {
   constructor(
     private readonly logger: LoggerService,
     private readonly passwordHelperService: PasswordHelperService,

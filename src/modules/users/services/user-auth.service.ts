@@ -2,9 +2,10 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { LoggerService } from 'src/logs/logger.service';
 import { IUser } from '../interfaces/entities/user.interface';
 import { UserAuthenticationRepository } from '../repos/userAuthentication.repository';
+import { IUserAuthService } from '../interfaces';
 
 @Injectable()
-export class UserAuthService {
+export class UserAuthService implements IUserAuthService {
   constructor(
     private readonly userAuthRepository: UserAuthenticationRepository,
     private readonly logger: LoggerService,

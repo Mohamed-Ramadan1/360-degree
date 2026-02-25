@@ -12,9 +12,10 @@ import { PasswordHelperService } from 'src/common/services/password-helper.servi
 import { TokensTrackingService } from 'src/common/services/tokens-tracking-service.service';
 import { generatePasswordUpdatedEmail } from '../emails/templates/passwordChangeConfirmationEmail';
 import { generateCongratulationsEmail } from '../emails/templates/generateCongratulationsEmail';
+import { IAccountRecoveryService } from '../interfaces/services/accountRecoveryService.interface';
 
 @Injectable()
-export class AccountRecoveryService {
+export class AccountRecoveryService implements IAccountRecoveryService {
   constructor(
     private readonly userAuthService: UserAuthService,
     private readonly verificationTokensCreator: VerificationTokensCreatorService,

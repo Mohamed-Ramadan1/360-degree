@@ -6,10 +6,11 @@ import { RedisService } from '../../infrastructure/redis/services/redis.service'
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { LoggerService } from 'src/logs/logger.service';
+import { IVerificationTokensCreatorService } from '../interfaces/verification-tokens-creator.interface';
 
 @Injectable()
 export class VerificationTokensCreatorService
-  implements OnModuleDestroy, OnModuleInit
+  implements IVerificationTokensCreatorService, OnModuleDestroy, OnModuleInit
 {
   constructor(
     private readonly redisService: RedisService,

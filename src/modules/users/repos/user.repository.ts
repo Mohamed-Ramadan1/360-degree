@@ -4,13 +4,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IUser } from '../interfaces/entities/user.interface';
 import { UpdateProfileData } from '../interfaces/services/profileManagementService.interface';
+import { IUserRepository } from '../interfaces';
 
 @Injectable()
-export class UserRepository {
+export class UserRepository implements IUserRepository {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
+
+  get repository(): Repository<User> {
+    return this.userRepository;
+  }
 
   async findById(userId: string): Promise<IUser | null> {
     return await this.userRepository.findOne({

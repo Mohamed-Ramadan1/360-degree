@@ -2,8 +2,11 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { LoggerService } from 'src/logs/logger.service';
+import { EmailSenderServiceInterface } from '../interfaces/emailSender.interface';
 @Injectable()
-export class EmailSenderService implements OnModuleInit {
+export class EmailSenderService
+  implements OnModuleInit, EmailSenderServiceInterface
+{
   private readonly emailSmtpHost: string | undefined;
   private readonly emailSmtpPort: number | undefined;
   private readonly emailSmtpUser: string | undefined;
