@@ -1,4 +1,11 @@
-import { Controller, Patch, UseInterceptors, Req, Post } from '@nestjs/common';
+import {
+  Controller,
+  Patch,
+  UseInterceptors,
+  Req,
+  Post,
+  Body,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { AccountSettingsService } from '../services/account-settings.service';
 import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
@@ -13,7 +20,9 @@ import {
   ApiBadRequestResponse,
   ApiUnauthorizedResponse,
   ApiBearerAuth,
+  ApiBody,
 } from '@nestjs/swagger';
+import { VerifyPhoneNumberDto } from '../dto';
 
 @Throttle({ default: { limit: 25, ttl: 600000 } })
 @UseInterceptors(TransformResponseInterceptor)
@@ -121,5 +130,48 @@ export class AccountSettingsController {
     await this.accountSettingsService.requestPhoneNumberVerification(req.user);
 
     return { message: 'Phone number verification requested successfully' };
+  }
+
+  @ApiOperation({
+    summary: 'Verify phone number',
+    description:
+      'Allows a user to verify their phone number using a one-time password (OTP) code. This process confirms that the user has access to the provided phone number.',
+  })
+  @ApiBody({
+    type: VerifyPhoneNumberDto,
+    description: 'OTP code for phone verification',
+    examples: {
+      valid: {
+        summary: 'Valid OTP Code',
+        value: { otpCode: '123456' },
+      },
+      invalid: {
+        summary: 'Invalid OTP Code',
+        value: { otpCode: '000000' },
+      },
+    },
+  })
+  @ApiOkResponse({
+    description: 'Phone number verified successfully',
+    type: OperationSuccessDto,
+    example: { message: 'Phone number verified successfully' },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid OTP code or verification failed',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @Patch('phone/verify')
+  async verifyPhoneNumber(
+    @Req() req: Request,
+    @Body() verifyPhoneDto: VerifyPhoneNumberDto,
+  ): Promise<OperationSuccessDto> {
+    await this.accountSettingsService.verifyPhoneNumber(
+      verifyPhoneDto.otpCode,
+      req.user.id,
+    );
+
+    return { message: 'Phone number verified successfully' };
   }
 }

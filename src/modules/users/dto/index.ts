@@ -11,3 +11,4 @@ export { BulkRolesAssignResponseDto } from './response/bulk-roles-assign.dto';
 export { BulkRolesRemoveDto } from './requests/bulk-roles-remove.dto';
 export { BulkRolesRemoveResponseDto } from './response/bulk-roles-remove.dto';
 export { RetrieveUserRolesResponseDto } from './response/retrieval-user-roles.dto';
+export { VerifyPhoneNumberDto } from './requests/verify-phone-number.dto';

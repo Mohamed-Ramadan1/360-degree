@@ -4,7 +4,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 // external package imports
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 
 // entity imports
 import { User } from '../entities/user.entity';
@@ -44,5 +44,18 @@ export class UserSettingsRepository {
     if (result.affected === 0) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
+  }
+
+  async verifyPhoneNumber(userId: string): Promise<boolean> {
+    const result: UpdateResult = await this.userRepository.update(userId, {
+      phoneNumberVerified: true,
+      phoneNumberVerifiedAt: new Date(),
+    });
+
+    if (result.affected === 0) {
+      return false;
+    }
+
+    return true;
   }
 }

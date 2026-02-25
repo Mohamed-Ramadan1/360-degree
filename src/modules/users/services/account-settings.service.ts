@@ -74,8 +74,10 @@ export class AccountSettingsService {
         );
       }
 
+      const key = `${this.phoneVerificationRequestKey}${user.id}`;
+
       const otp = await this.otpService.generateOtp(
-        this.phoneVerificationRequestKey,
+        key,
         this.phoneVerificationOtpTtl,
       );
 
@@ -87,6 +89,36 @@ export class AccountSettingsService {
       const error = err instanceof Error ? err : new Error('Unknown error');
       this.logger.error(
         `Failed to request phone number verification for user ${user.id}: ${error.message}`,
+      );
+      throw error;
+    }
+  }
+
+  async verifyPhoneNumber(otp: string, userId: string): Promise<void> {
+    try {
+      const key = `${this.phoneVerificationRequestKey}${userId}`;
+
+      const isValid = await this.otpService.validateOtp(key, otp);
+      if (!isValid) {
+        throw new BadRequestException('Invalid or expired OTP code.');
+      }
+
+      const isVerified =
+        await this.userSettingsRepository.verifyPhoneNumber(userId);
+
+      if (!isVerified) {
+        throw new BadRequestException(
+          'Phone number could not be verified, please try again later.',
+        );
+      }
+
+      await this.otpService.deleteOtp(key);
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error('Unknown error');
+      this.logger.error(
+        `Failed to verify phone number for user ${userId}: ${error.message}`,
+        error,
+        this.constructor.name,
       );
       throw error;
     }

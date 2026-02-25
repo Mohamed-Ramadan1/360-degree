@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { IUser } from '../interfaces/entities/user.interface';
 import { LoggerService } from 'src/logs/logger.service';
 import { UserAuthenticationRepository, UserRepository } from '../repos';
@@ -84,12 +88,15 @@ export class ProfileManagementService {
       }
 
       await this.userRepository.updateUserProfile(user.id, updatedData);
-    } catch (err: unknown) {
+    } catch (err) {
       const error = err instanceof Error ? err : new Error('Unknown error');
       this.logger.error(
         `Failed to update profile for user ${user.id}: ${error.message}`,
         error,
       );
+      if (err.code === '23505') {
+        throw new ConflictException('Phone number already exists');
+      }
       throw error;
     }
   }
