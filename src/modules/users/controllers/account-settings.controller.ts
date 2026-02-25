@@ -70,4 +70,29 @@ export class AccountSettingsController {
 
     return { message: 'Notifications enabled successfully' };
   }
+
+  @ApiOperation({
+    summary: 'Disable notifications',
+    description:
+      'Allows a user to disable notifications for their account. This setting helps users manage their notification preferences and reduce unwanted alerts.',
+  })
+  @ApiOkResponse({
+    description: 'Notifications disabled successfully',
+    type: OperationSuccessDto,
+    example: { message: 'Notifications disabled successfully' },
+  })
+  @ApiBadRequestResponse({
+    description: 'Notifications already disabled or invalid request',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @Patch('notifications/disable')
+  async disableNotifications(
+    @Req() req: Request,
+  ): Promise<OperationSuccessDto> {
+    await this.accountSettingsService.disableNotifications(req.user);
+
+    return { message: 'Notifications disabled successfully' };
+  }
 }

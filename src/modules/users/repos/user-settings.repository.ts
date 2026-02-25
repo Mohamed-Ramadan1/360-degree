@@ -35,4 +35,14 @@ export class UserSettingsRepository {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
   }
+
+  async disableNotifications(userId: string): Promise<void> {
+    const result = await this.userRepository.update(userId, {
+      notificationsEnabled: false,
+    });
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+  }
 }
