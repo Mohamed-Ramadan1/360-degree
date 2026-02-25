@@ -1,13 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { LoggerService } from 'src/logs/logger.service';
 
-import { IUser } from '../interfaces';
+import { IAccountSettingsService, IUser } from '../interfaces';
 import { UserSettingsRepository } from '../repos';
 import { OtpService } from 'src/common/services/otp.service';
 import { SmsSenderService } from 'src/common/services/sms-sender.service';
 
 @Injectable()
-export class AccountSettingsService {
+export class AccountSettingsService implements IAccountSettingsService {
   private phoneVerificationRequestKey = 'phone_verification_otp:';
   private phoneVerificationOtpTtl = 600; // 10 minutes in seconds
 

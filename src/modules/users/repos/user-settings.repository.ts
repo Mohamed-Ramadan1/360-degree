@@ -8,9 +8,10 @@ import { Repository, UpdateResult } from 'typeorm';
 
 // entity imports
 import { User } from '../entities/user.entity';
+import { IUserSettingsRepository } from '../interfaces';
 
 @Injectable()
-export class UserSettingsRepository {
+export class UserSettingsRepository implements IUserSettingsRepository {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
