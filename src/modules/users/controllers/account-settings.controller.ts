@@ -47,4 +47,27 @@ export class AccountSettingsController {
 
     return { message: 'Terms accepted successfully' };
   }
+
+  @ApiOperation({
+    summary: 'Enable notifications',
+    description:
+      'Allows a user to enable notifications for their account. This setting helps users stay informed about important updates and activities related to their account.',
+  })
+  @ApiOkResponse({
+    description: 'Notifications enabled successfully',
+    type: OperationSuccessDto,
+    example: { message: 'Notifications enabled successfully' },
+  })
+  @ApiBadRequestResponse({
+    description: 'Notifications already enabled or invalid request',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @Patch('notifications/enable')
+  async enableNotifications(@Req() req: Request): Promise<OperationSuccessDto> {
+    await this.accountSettingsService.enableNotifications(req.user);
+
+    return { message: 'Notifications enabled successfully' };
+  }
 }

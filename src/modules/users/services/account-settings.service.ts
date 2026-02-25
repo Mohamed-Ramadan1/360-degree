@@ -26,4 +26,19 @@ export class AccountSettingsService {
       throw error;
     }
   }
+
+  async enableNotifications(user: IUser): Promise<void> {
+    if (user.notificationsEnabled) {
+      return;
+    }
+    try {
+      await this.userSettingsRepository.enableNotifications(user.id);
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error('Unknown error');
+      this.logger.error(
+        `Failed to enable notifications for user ${user.id}: ${error.message}`,
+      );
+      throw error;
+    }
+  }
 }

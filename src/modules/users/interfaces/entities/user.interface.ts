@@ -7,6 +7,7 @@ export interface IUser {
   email: string;
   password: string;
   passwordLastChangedAt: Date;
+  notificationsEnabled: boolean;
   isVerified: boolean;
   verifiedAt: Date;
   lastLoginAt: Date | null;

@@ -22,7 +22,6 @@ export class User implements IUser {
   @Column({ type: 'boolean', nullable: false, default: true })
   isActive: boolean;
 
-  @Index('idx_user_email')
   @Column({ type: 'varchar', length: 255, unique: true, nullable: false })
   email: string;
 
@@ -32,7 +31,9 @@ export class User implements IUser {
   @Column({ type: 'timestamptz', nullable: true })
   passwordLastChangedAt: Date;
 
-  @Index('idx_user_phone')
+  @Column({ type: 'boolean', nullable: false, default: true })
+  notificationsEnabled: boolean;
+
   @Column({ type: 'varchar', length: 20, unique: true, nullable: true })
   phoneNumber: string;
 
