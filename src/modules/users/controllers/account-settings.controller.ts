@@ -1,4 +1,4 @@
-import { Controller, Patch, UseInterceptors, Req } from '@nestjs/common';
+import { Controller, Patch, UseInterceptors, Req, Post } from '@nestjs/common';
 import { Request } from 'express';
 import { AccountSettingsService } from '../services/account-settings.service';
 import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
@@ -94,5 +94,32 @@ export class AccountSettingsController {
     await this.accountSettingsService.disableNotifications(req.user);
 
     return { message: 'Notifications disabled successfully' };
+  }
+
+  @ApiOperation({
+    summary: 'Request phone number verification',
+    description:
+      "Allows a user to request verification for their phone number. This process typically involves sending a verification code to the user's phone, which they must then enter to confirm ownership of the number.",
+  })
+  @ApiOkResponse({
+    description: 'Phone number verification requested successfully',
+    type: OperationSuccessDto,
+    example: { message: 'Phone number verification requested successfully' },
+  })
+  @ApiBadRequestResponse({
+    description:
+      'Phone number verification already requested or invalid request',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @Throttle({ default: { limit: 5, ttl: 600000 } })
+  @Post('phone/request-verification')
+  async requestPhoneNumberVerification(
+    @Req() req: Request,
+  ): Promise<OperationSuccessDto> {
+    await this.accountSettingsService.requestPhoneNumberVerification(req.user);
+
+    return { message: 'Phone number verification requested successfully' };
   }
 }

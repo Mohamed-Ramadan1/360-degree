@@ -6,6 +6,8 @@ import { RedisModule } from '.././infrastructure/redis/redis.module';
 import { TokensTrackingService } from './services/tokens-tracking-service.service';
 import { PasswordHelperService } from './services/password-helper.service';
 import { ResourceCleanupService } from './services/resource-cleanup.service';
+import { OtpService } from './services/otp.service';
+import { SmsSenderService } from './services/sms-sender.service';
 
 @Global()
 @Module({
@@ -16,6 +18,8 @@ import { ResourceCleanupService } from './services/resource-cleanup.service';
     TokensTrackingService,
     PasswordHelperService,
     ResourceCleanupService,
+    OtpService,
+    SmsSenderService,
   ],
   exports: [
     EmailSenderService,
@@ -23,6 +27,8 @@ import { ResourceCleanupService } from './services/resource-cleanup.service';
     TokensTrackingService,
     PasswordHelperService,
     ResourceCleanupService,
+    OtpService,
+    SmsSenderService,
   ],
 })
 export class CommonModule {}
