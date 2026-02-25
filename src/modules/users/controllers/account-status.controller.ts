@@ -46,4 +46,29 @@ export class AccountStatusController {
       message: 'Account activated successfully',
     };
   }
+
+  @ApiOperation({
+    summary: 'Deactivate Account',
+    description:
+      'Deactivates a user account, restricting access to features and services.',
+  })
+  @ApiOkResponse({
+    description: 'Account deactivated successfully',
+    type: OperationSuccessDto,
+    example: { message: 'Account deactivated successfully' },
+  })
+  @ApiBadRequestResponse({
+    description: 'Account is already deactivated or invalid request',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @Post('deactivate')
+  async deactivateAccount(@Req() req: Request): Promise<OperationSuccessDto> {
+    await this.accountStatusService.deactivateAccount(req.user);
+
+    return {
+      message: 'Account deactivated successfully',
+    };
+  }
 }

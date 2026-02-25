@@ -1,16 +1,19 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 // interfaces imports
-import { IUser } from '../interfaces/index';
+import { IAccountStatusService, IUser } from '../interfaces/index';
 import { LoggerService } from 'src/logs/logger.service';
 
 import { EmailQueueService } from 'src/queues/index';
 
-import { generateAccountActivationEmail } from '../emails';
+import {
+  generateAccountActivationEmail,
+  generateAccountDeactivationEmail,
+} from '../emails';
 
 import { UserAccountStatusRepository } from '../repos';
 
 @Injectable()
-export class AccountStatusService {
+export class AccountStatusService implements IAccountStatusService {
   constructor(
     private readonly logger: LoggerService,
     private readonly accountStatusRepository: UserAccountStatusRepository,
@@ -45,6 +48,40 @@ export class AccountStatusService {
 
       this.logger.error(
         `Failed to activate account for userId: ${user.id}`,
+        err,
+      );
+      throw err;
+    }
+  }
+
+  async deactivateAccount(user: IUser): Promise<void> {
+    const isActive = this.isActive(user);
+    if (!isActive) {
+      throw new BadRequestException('Account is already deactivated');
+    }
+    try {
+      const result = await this.accountStatusRepository.markAccountAsInactive(
+        user.id,
+      );
+      if (result.affected === 0) {
+        throw new Error('Failed to deactivate account');
+      }
+
+      await this.emailQueueService.addEmailJob({
+        type: 'send-deactivation-email',
+        to: user.email,
+        subject: 'Account Deactivated',
+        text: 'Your account has been deactivated.',
+        html: generateAccountDeactivationEmail({
+          user: user,
+          deactivationDate: new Date(),
+        }),
+      });
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error(String(error));
+
+      this.logger.error(
+        `Failed to deactivate account for userId: ${user.id}`,
         err,
       );
       throw err;
