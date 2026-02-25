@@ -19,6 +19,9 @@ export class User implements IUser {
   @Column({ type: 'varchar', length: 100, nullable: false })
   name: string;
 
+  @Column({ type: 'boolean', nullable: false, default: true })
+  isActive: boolean;
+
   @Index('idx_user_email')
   @Column({ type: 'varchar', length: 255, unique: true, nullable: false })
   email: string;

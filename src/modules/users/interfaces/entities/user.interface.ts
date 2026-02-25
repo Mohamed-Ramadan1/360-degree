@@ -3,6 +3,7 @@ import { UserRoles } from 'src/common/consts';
 export interface IUser {
   id: string;
   name: string;
+  isActive: boolean;
   email: string;
   password: string;
   passwordLastChangedAt: Date;
