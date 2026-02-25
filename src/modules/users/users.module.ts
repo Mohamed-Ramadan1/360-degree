@@ -5,6 +5,7 @@ import {
   UserAuthenticationRepository,
   UserRepository,
   UserRolesRepository,
+  UserSettingsRepository,
 } from './repos';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
@@ -16,6 +17,8 @@ import { RolesManagementService } from './services/roles-management.service';
 import { RolesManagementController } from './controllers/roles-management.controller';
 import { AccountStatusController } from './controllers/account-status.controller';
 import { AccountStatusService } from './services/account-status.service';
+import { AccountSettingsController } from './controllers/account-settings.controller';
+import { AccountSettingsService } from './services/account-settings.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
@@ -24,12 +27,15 @@ import { AccountStatusService } from './services/account-status.service';
     ProfileManagementController,
     RolesManagementController,
     AccountStatusController,
+    AccountSettingsController,
   ],
   providers: [
     UserAuthService,
     UserAuthenticationRepository,
     UserRepository,
     UserRolesRepository,
+    UserSettingsRepository,
+    AccountSettingsService,
     UserAccountStatusRepository,
     UsersCrudService,
     ProfileManagementService,

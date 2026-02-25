@@ -60,6 +60,15 @@ export class User implements IUser {
   @Column({ type: 'boolean', nullable: false, default: false })
   isDisabled: boolean;
 
+  @Column({ type: 'boolean', nullable: false, default: false })
+  termsAccepted: boolean;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  termsAcceptedAt: Date | null;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  termsVersion: string | null;
+
   @Column({
     type: 'enum',
     enum: UserRoles,

@@ -17,6 +17,9 @@ export interface IUser {
   accountToBeDeleted: boolean;
   toBeDeletedAt: Date | null;
   isDisabled: boolean;
+  termsAccepted: boolean;
+  termsAcceptedAt: Date | null;
+  termsVersion: string | null;
   profileImage: string;
   profileImageKey: string | null;
   createdAt: Date;
