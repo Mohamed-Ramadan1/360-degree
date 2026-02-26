@@ -4,7 +4,7 @@ import { LoggerService } from 'src/logs/logger.service';
 import { IAccountSettingsService, IUser } from '../interfaces';
 import { UserSettingsRepository } from '../repos';
 import { OtpService } from 'src/common/services/otp.service';
-import { SmsSenderService } from 'src/common/services/sms-sender.service';
+import { SmsQueueService } from 'src/queues/services/sms-queue.service';
 
 @Injectable()
 export class AccountSettingsService implements IAccountSettingsService {
@@ -13,9 +13,9 @@ export class AccountSettingsService implements IAccountSettingsService {
 
   constructor(
     private readonly logger: LoggerService,
-    private readonly smsSenderService: SmsSenderService,
     private readonly otpService: OtpService,
     private readonly userSettingsRepository: UserSettingsRepository,
+    private readonly smsQueueService: SmsQueueService,
   ) {}
 
   async acceptTerms(user: IUser): Promise<void> {
@@ -81,10 +81,11 @@ export class AccountSettingsService implements IAccountSettingsService {
         this.phoneVerificationOtpTtl,
       );
 
-      await this.smsSenderService.send(
-        user.phoneNumber,
-        `Welcome to 360-degree app, your verification code is ${otp}`,
-      );
+      await this.smsQueueService.addSmsJob({
+        type: 'otp-verification',
+        to: user.phoneNumber,
+        message: `Welcome to 360-degree app, your verification code is ${otp}`,
+      });
     } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error('Unknown error');
       this.logger.error(

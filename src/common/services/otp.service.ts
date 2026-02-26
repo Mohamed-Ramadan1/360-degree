@@ -1,6 +1,7 @@
 import { LoggerService } from 'src/logs/logger.service';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { RedisService } from '../../infrastructure/redis/services/redis.service';
+import { randomInt } from 'crypto';
 
 @Injectable()
 export class OtpService implements OnModuleInit {
@@ -115,11 +116,9 @@ export class OtpService implements OnModuleInit {
   }
 
   private generateRandomOtp(length = 6): string {
-    const digits = '0123456789';
-    let otp = '';
-    for (let i = 0; i < length; i++) {
-      otp += digits[Math.floor(Math.random() * 10)];
-    }
-    return otp;
+    const max = 10 ** length; // 1000000 for 6 digits
+    const min = 10 ** (length - 1); // 100000 for 6 digits
+
+    return randomInt(min, max).toString();
   }
 }

@@ -6,6 +6,7 @@ import {
   bullMQConfig,
   emailQueueConfig,
   resourceCleanupQueueConfig,
+  smsQueueConfig,
 } from './config/bullmq.config';
 
 import { EmailProcessor } from './processors/emails/email.processor';
@@ -15,12 +16,15 @@ import { EmailQueueService } from './services/email-queue.service';
 import { ResourceCleanupQueueService } from './services/resource-cleanup.service';
 import { ResourceCleanupService } from 'src/common/services/resource-cleanup.service';
 import { ResourceCleanupProcessor } from './processors/resourceCleanup/resource-cleanup.processor';
+import { SmsQueueService } from './services/sms-queue.service';
+import { SmsProcessor } from './processors/sms/sms.processor';
 @Global()
 @Module({
   imports: [
     BullModule.forRoot(bullMQConfig),
     BullModule.registerQueue(emailQueueConfig),
     BullModule.registerQueue(resourceCleanupQueueConfig),
+    BullModule.registerQueue(smsQueueConfig),
   ],
 
   providers: [
@@ -30,6 +34,8 @@ import { ResourceCleanupProcessor } from './processors/resourceCleanup/resource-
     ResourceCleanupProcessor,
     ResourceCleanupService,
     ResourceCleanupQueueService,
+    SmsProcessor,
+    SmsQueueService,
   ],
   exports: [
     EmailProcessor,
@@ -37,6 +43,8 @@ import { ResourceCleanupProcessor } from './processors/resourceCleanup/resource-
     BullModule,
     ResourceCleanupProcessor,
     ResourceCleanupQueueService,
+    SmsProcessor,
+    SmsQueueService,
   ],
 })
 export class QueuesModule {}

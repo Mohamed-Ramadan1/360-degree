@@ -38,12 +38,12 @@ export default tseslint.config(
       '@typescript-eslint/restrict-template-expressions': 'off',
       '@typescript-eslint/unbound-method': 'off',
       'prettier/prettier': 'error',
-      'prettier/prettier': [
-        'error',
-        {
-          endOfLine: 'auto',
-        },
-      ],
+      // 'prettier/prettier': [
+      //   'error',
+      //   {
+      //     endOfLine: 'auto',
+      //   },
+      // ],
     },
   },
 );
