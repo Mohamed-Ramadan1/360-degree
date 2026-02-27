@@ -1,0 +1,343 @@
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
+import { RolesManagementService } from '../services/roles-management.service';
+import {
+  AssignRolesDto,
+  BulkRolesAssignDto,
+  BulkRolesAssignResponseDto,
+  BulkRolesRemoveDto,
+  BulkRolesRemoveResponseDto,
+  RemovedRolesDto,
+  RetrieveUserRolesResponseDto,
+} from '../dto';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
+import { RolesGuard } from 'src/common/guards';
+import { SelfRolesAssignmentGuard } from '../guards/self-roles-assignment.guard';
+import { UserRoles } from 'src/common/consts';
+import { Roles } from 'src/common/decorators';
+import { OperationSuccessDto } from 'src/modules/auth/dtos';
+
+@Roles(UserRoles.SUPER_ADMIN, UserRoles.ADMIN, UserRoles.USER)
+@UseGuards(RolesGuard, SelfRolesAssignmentGuard)
+@UseInterceptors(TransformResponseInterceptor)
+@ApiTags('Roles Management')
+@ApiBearerAuth('JWT-auth')
+@Controller('roles-management')
+export class RolesManagementController {
+  constructor(private rolesManagementService: RolesManagementService) {}
+
+  @ApiOperation({
+    summary: 'Assign User Roles',
+    description: 'Assigns specified roles to a specific user.',
+  })
+  @ApiOkResponse({
+    description: 'Roles assigned successfully',
+    type: OperationSuccessDto,
+    example: { message: 'Roles assigned successfully' },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid user ID supplied',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'ID of the user to assign roles to',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiBody({
+    type: AssignRolesDto,
+    description: 'Payload to assign roles to a user',
+    examples: {
+      assignRoles: {
+        summary: 'Assign Roles Example',
+        value: {
+          roles: ['admin', 'support_agent'],
+        },
+      },
+      example: {
+        summary: 'Invalid Assign Roles Example',
+        value: {
+          roles: ['invalidRole'],
+        },
+      },
+    },
+  })
+  @Throttle({ default: { limit: 50, ttl: 20000 } })
+  @Patch('assign-roles/:userId')
+  @HttpCode(HttpStatus.OK)
+  async assignRoles(
+    @Param('userId', new ParseUUIDPipe()) userId: string,
+    @Body() assignRolesDto: AssignRolesDto,
+  ) {
+    await this.rolesManagementService.assignRoles(userId, assignRolesDto.roles);
+    return {
+      message: 'Roles assigned successfully',
+    };
+  }
+
+  @ApiOperation({
+    summary: 'Remove User Roles',
+    description: 'Removes specified roles from a specific user.',
+  })
+  @ApiOkResponse({
+    description: 'Roles removed successfully',
+    type: OperationSuccessDto,
+    example: { message: 'Roles removed successfully' },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid user ID supplied',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'ID of the user to remove roles from',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiBody({
+    type: RemovedRolesDto,
+    description: 'Payload to remove roles from a user',
+    examples: {
+      removeRoles: {
+        summary: 'Remove Roles Example',
+        value: {
+          roles: ['admin', 'moderator'],
+        },
+      },
+      example: {
+        summary: 'Invalid Remove Roles Example',
+        value: {
+          roles: ['invalidRole'],
+        },
+      },
+    },
+  })
+  @Throttle({ default: { limit: 50, ttl: 20000 } })
+  @Patch('remove-roles/:userId')
+  @HttpCode(HttpStatus.OK)
+  async removeRoles(
+    @Param('userId', new ParseUUIDPipe()) userId: string,
+    @Body() removeRolesDto: RemovedRolesDto,
+  ): Promise<OperationSuccessDto> {
+    await this.rolesManagementService.removeRoles(userId, removeRolesDto.roles);
+    return {
+      message: 'Roles removed successfully',
+    };
+  }
+
+  @ApiOperation({
+    summary: 'Reset User Roles',
+    description: 'Resets all roles assigned to a specific user.',
+  })
+  @ApiOkResponse({
+    description: 'Roles reset successfully',
+    type: OperationSuccessDto,
+    example: { message: 'Roles reset successfully' },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid user ID supplied',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'ID of the user to reset roles for',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @Throttle({ default: { limit: 20, ttl: 30000 } })
+  @Patch('reset-roles/:userId')
+  @HttpCode(HttpStatus.OK)
+  async resetRoles(
+    @Param('userId', new ParseUUIDPipe()) userId: string,
+  ): Promise<OperationSuccessDto> {
+    await this.rolesManagementService.resetRoles(userId);
+    return {
+      message: 'Roles reset successfully',
+    };
+  }
+
+  @ApiOperation({
+    summary: 'Bulk Assign Roles',
+    description: 'Assigns specified roles to multiple users in bulk.',
+  })
+  @ApiOkResponse({
+    description: 'Roles assigned successfully',
+    type: BulkRolesAssignResponseDto,
+    example: {
+      message: 'Roles assigned successfully',
+      success: true,
+      skipped: 2,
+      updated: 5,
+      details: {
+        updatedUserIds: ['user1', 'user2'],
+        skippedUserIds: ['user3'],
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiBody({
+    type: BulkRolesAssignDto,
+    description: 'Payload to bulk assign roles to users',
+    examples: {
+      bulkAssign: {
+        summary: 'Bulk Assign Roles Example',
+        value: {
+          users: ['user1', 'user2', 'user3'],
+          roles: ['admin', 'moderator'],
+        },
+      },
+      example: {
+        summary: 'Invalid Bulk Assign Example',
+        value: {
+          users: [],
+          roles: ['invalidRole'],
+        },
+      },
+    },
+  })
+  @Throttle({ default: { limit: 20, ttl: 30000 } })
+  @Patch('bulk-assign')
+  @HttpCode(HttpStatus.OK)
+  async bulkAssignRoles(
+    @Body() bulkRolesAssignDto: BulkRolesAssignDto,
+  ): Promise<BulkRolesAssignResponseDto> {
+    const { skipped, success, updated, details } =
+      await this.rolesManagementService.bulkAssignRoles(
+        bulkRolesAssignDto.users,
+        bulkRolesAssignDto.roles,
+      );
+    return {
+      message: success
+        ? 'Roles assigned successfully'
+        : 'No roles were assigned',
+      skipped,
+      success,
+      updated,
+      details,
+    };
+  }
+
+  @ApiOperation({
+    summary: 'Bulk Remove Roles',
+    description: 'Removes specified roles from multiple users in bulk.',
+  })
+  @ApiOkResponse({
+    description: 'Roles removed successfully',
+    type: BulkRolesRemoveResponseDto,
+    example: {
+      message: 'Roles removed successfully',
+      success: true,
+      updated: 5,
+      notFound: ['user3', 'user4'],
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiBody({
+    type: BulkRolesRemoveDto,
+    description: 'Payload to bulk remove roles from users',
+    examples: {
+      bulkRemove: {
+        summary: 'Bulk Remove Roles Example',
+        value: {
+          users: ['user1', 'user2', 'user3'],
+          roles: ['admin', 'support_agent'],
+        },
+      },
+      example: {
+        summary: 'Invalid Bulk Remove Example',
+        value: {
+          users: [],
+          roles: ['invalidRole'],
+        },
+      },
+    },
+  })
+  @Throttle({ default: { limit: 20, ttl: 30000 } })
+  @Patch('bulk-remove')
+  @HttpCode(HttpStatus.OK)
+  async bulkRemoveRoles(
+    @Body() bulkRolesRemoveDto: BulkRolesRemoveDto,
+  ): Promise<BulkRolesRemoveResponseDto> {
+    const { success, updated, notFound } =
+      await this.rolesManagementService.bulkRemoveRoles(
+        bulkRolesRemoveDto.users,
+        bulkRolesRemoveDto.roles,
+      );
+    return {
+      message: success ? 'Roles removed successfully' : 'No roles were removed',
+      success,
+      updated,
+      notFound,
+    };
+  }
+
+  @ApiOperation({
+    summary: 'Get User Roles',
+    description: 'Retrieves all roles assigned to a specific user.',
+  })
+  @ApiOkResponse({
+    description: 'User roles retrieved successfully',
+    type: RetrieveUserRolesResponseDto,
+    example: {
+      message: 'User roles retrieved successfully',
+      roles: ['admin', 'user'],
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid user ID supplied',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'ID of the user to retrieve roles for',
+    example: 'user123',
+  })
+  @Get(':userId/roles')
+  @HttpCode(HttpStatus.OK)
+  async getUserRoles(
+    @Param('userId') userId: string,
+  ): Promise<RetrieveUserRolesResponseDto & OperationSuccessDto> {
+    const roles = await this.rolesManagementService.getUserRoles(userId);
+    return {
+      message: 'User roles retrieved successfully',
+      roles,
+    };
+  }
+}

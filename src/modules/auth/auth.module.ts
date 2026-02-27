@@ -1,9 +1,25 @@
-import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
+import { forwardRef, Module } from '@nestjs/common';
+import { AuthService } from './services/auth.service';
+import { AuthController } from './controllers/auth.controller';
+import { UserAuthService } from '../users/services/user-auth.service';
+import { TokenCreationService } from './services/token-creation.service';
+import { LoggerService } from 'src/logs/logger.service';
+import { UsersModule } from '../index';
+import { TokenValidationService } from './services/token-validation.service';
+import { AccountRecoveryController } from './controllers/account-recovery.controller';
+import { AccountRecoveryService } from './services/account-recovery.service';
 
 @Module({
-  controllers: [AuthController],
-  providers: [AuthService],
+  imports: [forwardRef(() => UsersModule)],
+  controllers: [AuthController, AccountRecoveryController],
+  providers: [
+    AuthService,
+    UserAuthService,
+    TokenCreationService,
+    LoggerService,
+    TokenValidationService,
+    AccountRecoveryService,
+  ],
+  exports: [TokenValidationService],
 })
 export class AuthModule {}

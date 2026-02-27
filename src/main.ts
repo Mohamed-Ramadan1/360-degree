@@ -17,6 +17,12 @@ async function bootstrap() {
     }),
   );
 
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
+    prefix: 'api/v',
+  });
+
   const config = new DocumentBuilder()
     .setTitle('360-degree-API')
     .setDescription('The 360-degree API description')
@@ -41,11 +47,6 @@ async function bootstrap() {
     credentials: true,
   });
 
-  app.enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: '1',
-    prefix: 'api/v',
-  });
   await app.listen(process.env.PORT ?? 3000);
 }
 
