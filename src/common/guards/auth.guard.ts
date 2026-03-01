@@ -90,9 +90,9 @@ export class AuthGuard implements CanActivate {
     }
 
     // Optional: Add additional user validation (e.g., active status)
-    // if (!user.isActive) {
-    //   throw new UnauthorizedException('User account is inactive');
-    // }
+    if (!user.isActive) {
+      throw new UnauthorizedException('User account is inactive');
+    }
 
     if (user.accountToBeDeleted) {
       throw new UnauthorizedException(
