@@ -6,10 +6,10 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 
 // Application modules imports
-import { AuthModule, UsersModule } from './modules';
+import { AuthModule, TodosModule, UsersModule } from './modules';
 
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { databaseConfig, appConfig, jwtConfig } from './config';
+import { ConfigModule } from '@nestjs/config';
+import { appConfig, jwtConfig } from './config';
 import { LogsModule } from './logs/logs.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
 import { CommonModule } from './common/common.module';
@@ -17,29 +17,23 @@ import { QueuesModule } from './queues/queues.module';
 import { APP_FILTER, APP_GUARD, RouterModule } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { AuthGuard } from './common/guards';
-// import { LogsModule } from './logs/logs.module';
-// import { LoggerService } from './logs/logger.service';
-
-// import { CommonModule } from './common/common.module';
-
-// import { QueuesModule } from './queues/queues.module';
-// import { RedisModule } from 'infrastructure/redis/redis.module';
-// import { validate } from '@config/env.validation';
-// import { AllExceptionsFilter } from '@common/filters/http-exception.filter';
+import { dataSourceOptions } from '../data-source';
 
 @Module({
   imports: [
     RouterModule.register([
       { path: 'auth', module: AuthModule },
       { path: 'users', module: UsersModule },
+      { path: 'todos', module: TodosModule },
     ]),
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, appConfig, jwtConfig],
+      load: [appConfig, jwtConfig],
       envFilePath: ['.env.local', '.env'],
     }),
     AuthModule,
     UsersModule,
+    TodosModule,
     LogsModule,
     RedisModule,
     CommonModule,
@@ -62,24 +56,7 @@ import { AuthGuard } from './common/guards';
         limit: 5, // For login/signup
       },
     ]),
-    TypeOrmModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('database.host'),
-        port: configService.get<number>('database.port'),
-        username: configService.get<string>('database.username'),
-        password: configService.get<string>('database.password'),
-        database: configService.get<string>('database.database'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get<boolean>('database.synchronize'),
-        autoLoadEntities: true,
-        logging: configService.get<boolean>('database.logging'),
-        maxQueryExecutionTime: 1000,
-        // migrationsRun: true,
-        // migrations: [__dirname + '/migrations/*{.ts,.js}'],
-      }),
-    }),
+    TypeOrmModule.forRoot(dataSourceOptions),
   ],
   controllers: [],
   providers: [
