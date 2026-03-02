@@ -18,6 +18,7 @@ import {
   TodoCreateDto,
   TodoCreateResponse,
   UpdateTodoDto,
+  UpdateTodoStatusDto,
 } from '../dto';
 import { TodoService } from '../services/todo.service';
 import {
@@ -235,7 +236,7 @@ export class TodosController {
     @Body() updateTodoDto: UpdateTodoDto,
     @Param('id', new ParseUUIDPipe()) id: string,
     @Req() req,
-  ) {
+  ): Promise<OperationSuccessDto> {
     await this.todoService.updateTodo(id, updateTodoDto, req.user.id);
     return {
       message: 'Todo updated successfully',
@@ -266,13 +267,67 @@ export class TodosController {
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @Delete(':id')
-  async deleteTodo(@Param('id', new ParseUUIDPipe()) id: string) {
+  @HttpCode(HttpStatus.OK)
+  async deleteTodo(
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<OperationSuccessDto> {
     await this.todoService.deleteTodo(id);
     return {
       message: 'Todo deleted successfully',
     };
   }
 
+  @ApiOperation({
+    summary: 'Update todo status',
+    description: 'Updates the status of a todo item.',
+  })
+  @ApiOkResponse({
+    description: 'Todo status updated successfully',
+    type: OperationSuccessDto,
+    example: {
+      message: 'Todo status updated successfully',
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid todo ID or status supplied',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Unique identifier of the todo item to update',
+    type: 'string',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiBody({
+    type: UpdateTodoStatusDto,
+    description: 'The new status for the todo item',
+    examples: {
+      valid: {
+        summary: 'Valid status update',
+        value: {
+          status: 'Done',
+        },
+      },
+      invalid: {
+        summary: 'Invalid status update - not an enum value',
+        value: {
+          status: 'InvalidStatus',
+        },
+      },
+    },
+  })
   @Patch(':id/status')
-  updateTodoStatus() {}
+  @HttpCode(HttpStatus.OK)
+  async updateTodoStatus(
+    @Body() updateTodoStatusDto: UpdateTodoStatusDto,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<OperationSuccessDto> {
+    await this.todoService.updateTodoStatus(id, updateTodoStatusDto);
+
+    return {
+      message: 'Todo status updated successfully',
+    };
+  }
 }

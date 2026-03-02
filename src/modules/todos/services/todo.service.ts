@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { TodoCreateDto, UpdateTodoDto } from '../dto';
+import { TodoCreateDto, UpdateTodoDto, UpdateTodoStatusDto } from '../dto';
 import { CategoryRepository, TodoRepository } from '../repos';
 import { LoggerService } from 'src/logs/logger.service';
 
@@ -62,6 +62,17 @@ export class TodoService {
       await this.todoRepository.findAndDelete(id);
     } catch (error) {
       this.logger.error('Failed to delete todo', error);
+      throw error;
+    }
+  }
+
+  async updateTodoStatus(id: string, updateTodoStatusDto: UpdateTodoStatusDto) {
+    try {
+      await this.todoRepository.findAndUpdate(id, {
+        status: updateTodoStatusDto.status,
+      });
+    } catch (error) {
+      this.logger.error('Failed to update todo status', error);
       throw error;
     }
   }
