@@ -3,12 +3,14 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Patch,
   Post,
   Req,
   UseInterceptors,
 } from '@nestjs/common';
-import { TodoCreateDto, TodoCreateResponse } from '../dto';
+import { GetAllTodosResponse, TodoCreateDto, TodoCreateResponse } from '../dto';
 import { TodoService } from '../services/todo.service';
 import {
   ApiBadRequestResponse,
@@ -78,6 +80,7 @@ export class TodosController {
     },
   })
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   async createTodo(@Body() createTodoDto: TodoCreateDto, @Req() req) {
     const todo = await this.todoService.createTodo(req.user.id, createTodoDto);
     return {
@@ -86,8 +89,45 @@ export class TodosController {
     };
   }
 
+  @ApiOperation({
+    summary: 'Get all todos',
+    description:
+      'Retrieves a list of all todo items for the authenticated user.',
+  })
+  @ApiOkResponse({
+    description: 'Todos retrieved successfully',
+    type: GetAllTodosResponse,
+    example: {
+      message: 'Todos retrieved successfully',
+      todos: [
+        {
+          id: '123e4567-e89b-12d3-a456-426614174000',
+          title: 'Buy groceries',
+          description: 'Milk, Bread, Eggs',
+          dueDate: '2024-12-31T23:59:59Z',
+          priority: 'High',
+          otherInfo: '...',
+        },
+        {
+          id: '123e4567-e89b-12d3-a456-426614174001',
+          title: 'Finish project report',
+          description: 'Complete the final report for the project',
+          dueDate: '2024-12-31T23:59:59Z',
+          priority: 'Medium',
+          otherInfo: '...',
+        },
+      ],
+    },
+  })
   @Get()
-  getAllTodos() {}
+  @HttpCode(HttpStatus.OK)
+  async getAllTodos() {
+    const todos = await this.todoService.getAllTodos();
+    return {
+      message: 'Todos retrieved successfully',
+      todos,
+    };
+  }
 
   @Get(':id')
   getTodoById() {}

@@ -21,4 +21,8 @@ export class TodoRepository {
     });
     return this.todoRepository.save(todo);
   }
+
+  async getAllTodos() {
+    return this.todoRepository.find();
+  }
 }
