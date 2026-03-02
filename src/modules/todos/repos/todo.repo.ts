@@ -2,9 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Todo } from '../entities/todo.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ITodoRepository } from '../interfaces';
 
 @Injectable()
-export class TodoRepository {
+export class TodoRepository implements ITodoRepository {
   constructor(
     @InjectRepository(Todo)
     private readonly todoRepository: Repository<Todo>,

@@ -2,9 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { TodoCreateDto, UpdateTodoDto, UpdateTodoStatusDto } from '../dto';
 import { CategoryRepository, TodoRepository } from '../repos';
 import { LoggerService } from 'src/logs/logger.service';
+import { ITodoService } from '../interfaces';
 
 @Injectable()
-export class TodoService {
+export class TodoService implements ITodoService {
   constructor(
     private readonly todoRepository: TodoRepository,
     private readonly categoryRepository: CategoryRepository,

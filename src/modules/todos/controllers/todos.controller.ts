@@ -33,7 +33,9 @@ import {
 import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
 import { ITodo } from '../interfaces/entities/todo.interface';
 import { OperationSuccessDto } from 'src/modules/auth/dtos';
+import { Throttle } from '@nestjs/throttler';
 
+@Throttle({ default: { limit: 25, ttl: 600000 } })
 @UseInterceptors(TransformResponseInterceptor)
 @ApiBearerAuth('JWT-auth')
 @Controller()
