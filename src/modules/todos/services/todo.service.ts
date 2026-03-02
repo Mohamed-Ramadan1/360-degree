@@ -57,6 +57,15 @@ export class TodoService {
     }
   }
 
+  async deleteTodo(id: string) {
+    try {
+      await this.todoRepository.findAndDelete(id);
+    } catch (error) {
+      this.logger.error('Failed to delete todo', error);
+      throw error;
+    }
+  }
+
   private async validateCategoryOwnership(userId: string, categoryId: string) {
     const category = await this.categoryRepository.findCategory(
       userId,

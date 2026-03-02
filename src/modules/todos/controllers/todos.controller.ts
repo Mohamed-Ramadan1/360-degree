@@ -242,8 +242,36 @@ export class TodosController {
     };
   }
 
+  @ApiOperation({
+    summary: 'Delete a todo',
+    description: 'Deletes a todo item by its unique identifier.',
+  })
+  @ApiOkResponse({
+    description: 'Todo deleted successfully',
+    type: OperationSuccessDto,
+    example: {
+      message: 'Todo deleted successfully',
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid todo ID supplied',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Unique identifier of the todo item to delete',
+    type: 'string',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @Delete(':id')
-  deleteTodo() {}
+  async deleteTodo(@Param('id', new ParseUUIDPipe()) id: string) {
+    await this.todoService.deleteTodo(id);
+    return {
+      message: 'Todo deleted successfully',
+    };
+  }
 
   @Patch(':id/status')
   updateTodoStatus() {}

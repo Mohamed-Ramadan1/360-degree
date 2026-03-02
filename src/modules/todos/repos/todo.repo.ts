@@ -52,4 +52,11 @@ export class TodoRepository {
       throw new NotFoundException('No todo match provided id');
     }
   }
+
+  async findAndDelete(id: string) {
+    const result = await this.todoRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException('No todo match provided id');
+    }
+  }
 }
