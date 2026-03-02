@@ -29,6 +29,11 @@ export class TodoService {
     return await this.todoRepository.getAllTodos();
   }
 
+  async getTodoById(id: string) {
+    const todo = await this.todoRepository.findOneById(id);
+    return todo;
+  }
+
   private async validateCategoryOwnership(userId: string, categoryId: string) {
     const category = await this.categoryRepository.findCategory(
       userId,

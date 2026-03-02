@@ -5,12 +5,19 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Req,
   UseInterceptors,
 } from '@nestjs/common';
-import { GetAllTodosResponse, TodoCreateDto, TodoCreateResponse } from '../dto';
+import {
+  GetAllTodosResponse,
+  GetTodoResponse,
+  TodoCreateDto,
+  TodoCreateResponse,
+} from '../dto';
 import { TodoService } from '../services/todo.service';
 import {
   ApiBadRequestResponse,
@@ -18,8 +25,11 @@ import {
   ApiBody,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
+import { ITodo } from '../interfaces/entities/todo.interface';
 
 @UseInterceptors(TransformResponseInterceptor)
 @ApiBearerAuth('JWT-auth')
@@ -129,8 +139,46 @@ export class TodosController {
     };
   }
 
+  @ApiOperation({
+    summary: 'Get a todo by ID',
+    description: 'Retrieves a single todo item by its unique identifier.',
+  })
+  @ApiOkResponse({
+    type: GetTodoResponse,
+    description: 'Todo retrieved successfully',
+    example: {
+      message: 'Todo retrieved successfully',
+      todo: {
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        title: 'Buy groceries',
+        description: 'Milk, Bread, Eggs',
+        dueDate: '2024-12-31T23:59:59Z',
+        priority: 'High',
+        otherInfo: '...',
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid todo ID supplied',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Unique identifier of the todo item',
+    type: 'string',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @Get(':id')
-  getTodoById() {}
+  @HttpCode(HttpStatus.OK)
+  async getTodoById(@Param('id', new ParseUUIDPipe()) id: string) {
+    const todo: ITodo = await this.todoService.getTodoById(id);
+    return {
+      message: 'Todo retrieved successfully',
+      todo,
+    };
+  }
 
   @Patch(':id')
   updateTodo() {}

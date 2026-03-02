@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Todo } from '../entities/todo.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -24,5 +24,25 @@ export class TodoRepository {
 
   async getAllTodos() {
     return this.todoRepository.find();
+  }
+
+  async findOneById(id: string) {
+    const todo = await this.todoRepository.findOne({
+      where: { id },
+      select: [
+        'id',
+        'title',
+        'description',
+        'dueDate',
+        'priority',
+        'status',
+        'isPersonal',
+        'ownerId',
+        'tags',
+        'categoryId',
+      ],
+    });
+    if (!todo) throw new NotFoundException('No todo match provided id');
+    return todo;
   }
 }
