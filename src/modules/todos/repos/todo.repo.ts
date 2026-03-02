@@ -45,4 +45,11 @@ export class TodoRepository {
     if (!todo) throw new NotFoundException('No todo match provided id');
     return todo;
   }
+
+  async findAndUpdate(id: string, updateData: Partial<Todo>) {
+    const result = await this.todoRepository.update(id, updateData);
+    if (result.affected === 0) {
+      throw new NotFoundException('No todo match provided id');
+    }
+  }
 }

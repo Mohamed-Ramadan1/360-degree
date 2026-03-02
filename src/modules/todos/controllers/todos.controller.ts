@@ -17,6 +17,7 @@ import {
   GetTodoResponse,
   TodoCreateDto,
   TodoCreateResponse,
+  UpdateTodoDto,
 } from '../dto';
 import { TodoService } from '../services/todo.service';
 import {
@@ -30,6 +31,7 @@ import {
 } from '@nestjs/swagger';
 import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
 import { ITodo } from '../interfaces/entities/todo.interface';
+import { OperationSuccessDto } from 'src/modules/auth/dtos';
 
 @UseInterceptors(TransformResponseInterceptor)
 @ApiBearerAuth('JWT-auth')
@@ -180,8 +182,65 @@ export class TodosController {
     };
   }
 
+  @ApiOperation({
+    summary: 'Update a todo',
+    description:
+      'Updates an existing todo item. You can update any of the todo fields, and optionally change its associated category by providing a new categoryId.',
+  })
+  @ApiOkResponse({
+    description: 'Todo updated successfully',
+    type: OperationSuccessDto,
+    example: {
+      message: 'Todo updated successfully',
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data or todo ID',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Unique identifier of the todo item to update',
+    type: 'string',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiBody({
+    type: UpdateTodoDto,
+    description: 'The data to update the todo item with',
+    examples: {
+      valid: {
+        summary: 'Valid update request',
+        value: {
+          title: 'Buy groceries and snacks',
+          description: 'Milk, Bread, Eggs, Chips',
+          dueDate: '2025-01-15T23:59:59Z',
+          priority: 'Medium',
+        },
+      },
+      invalid: {
+        summary: 'Invalid update request - past due date',
+        value: {
+          title: '',
+          dueDate: '2020-01-15T23:59:59Z',
+          priority: '',
+        },
+      },
+    },
+  })
   @Patch(':id')
-  updateTodo() {}
+  @HttpCode(HttpStatus.OK)
+  async updateTodo(
+    @Body() updateTodoDto: UpdateTodoDto,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Req() req,
+  ) {
+    await this.todoService.updateTodo(id, updateTodoDto, req.user.id);
+    return {
+      message: 'Todo updated successfully',
+    };
+  }
 
   @Delete(':id')
   deleteTodo() {}
