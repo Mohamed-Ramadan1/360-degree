@@ -9,6 +9,7 @@ export interface ITodo {
   status: TodoStatus;
   isPersonal: boolean;
   ownerId: string;
+  categoryId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -23,7 +23,11 @@
     "docker:db:logs": "docker compose logs -f postgres",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
-    "docker:logs": "docker compose logs -f"
+    "docker:logs": "docker compose logs -f",
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
+    "migration:generate": "cross-env npm run typeorm -- migration:generate src/migrations/%npm_config_name% -d data-source.ts",
+    "migration:run": "npm run typeorm -- migration:run -d data-source.ts",
+    "migration:revert": "npm run typeorm -- migration:revert -d data-source.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.971.0",
@@ -53,6 +57,7 @@
     "pg": "^8.17.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
+    "sharp": "^0.34.5",
     "swagger-ui-express": "^5.0.1",
     "twilio": "^5.11.2",
     "typeorm": "^0.3.28",
@@ -82,6 +87,7 @@
     "@types/uuid": "^11.0.0",
     "@typescript-eslint/eslint-plugin": "^8.53.0",
     "@typescript-eslint/parser": "^8.53.0",
+    "cross-env": "^10.1.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
