@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Category } from '../entities/category.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/common/pagination/dto';
 import { paginate } from 'src/common/pagination/paginate.helper';
+import { UpdateCategoryDto } from '../dto';
 
 @Injectable()
 export class CategoryRepository {
@@ -44,5 +45,19 @@ export class CategoryRepository {
       },
       paginationDto,
     );
+  }
+
+  async findCategoryAndUpdate(
+    userId: string,
+    id: string,
+    updateCategoryDto: UpdateCategoryDto,
+  ): Promise<void> {
+    const result = await this.categoryRepository.update(
+      { id, ownerId: userId },
+      updateCategoryDto,
+    );
+    if (result.affected === 0) {
+      throw new NotFoundException('No category match provided id');
+    }
   }
 }

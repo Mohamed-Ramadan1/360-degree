@@ -5,6 +5,8 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -12,7 +14,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { CategoriesService } from '../services/category.service';
-import { CreateCategoryDto } from '../dto';
+import { CreateCategoryDto, UpdateCategoryDto } from '../dto';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -24,6 +26,7 @@ import {
 import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
 import { CategoryCreateResponse } from '../dto/response/category-create-response';
 import { PaginationDto } from 'src/common/pagination/dto/requests/pagination.dto';
+import { OperationSuccessDto } from 'src/modules/auth/dtos';
 
 @UseInterceptors(TransformResponseInterceptor)
 @ApiBearerAuth('JWT-auth')
@@ -124,8 +127,56 @@ export class CategoriesController {
     };
   }
 
+  @ApiOperation({
+    summary: 'Update a category',
+    description:
+      'Updates an existing category for the authenticated user. The category can be updated with a new name and color.',
+  })
+  @ApiOkResponse({
+    description: 'Category updated successfully',
+    type: OperationSuccessDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data or category ID',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiBody({
+    type: UpdateCategoryDto,
+    description: 'The data required to update an existing category',
+    examples: {
+      valid: {
+        summary: 'Valid category update request',
+        value: {
+          name: 'Updated Category Name',
+          color: '#FF5733',
+        },
+      },
+      invalid: {
+        summary: 'Invalid category update request',
+        value: {
+          name: '',
+        },
+      },
+    },
+  })
   @Patch(':id')
-  updateCategory() {}
+  @HttpCode(HttpStatus.OK)
+  async updateCategory(
+    @Body() updateCategoryDto: UpdateCategoryDto,
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Req() req,
+  ) {
+    await this.categoryService.updateCategory(
+      req.user.id,
+      id,
+      updateCategoryDto,
+    );
+    return {
+      message: 'Category updated successfully',
+    };
+  }
 
   @Delete(':id')
   deleteCategory() {}

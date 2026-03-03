@@ -5,3 +5,4 @@ export { GetAllTodosResponse } from './response/get-all-todos.response';
 export { GetTodoResponse } from './response/get-todo-response';
 export { UpdateTodoDto } from './requests/update-todo.dto';
 export { UpdateTodoStatusDto } from './requests/update-todo-status.dto';
+export { UpdateCategoryDto } from './requests/update-category.dto';

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CategoryRepository } from '../repos';
-import { CreateCategoryDto } from '../dto';
+import { CreateCategoryDto, UpdateCategoryDto } from '../dto';
 import { LoggerService } from 'src/logs/logger.service';
 import { PaginationDto } from 'src/common/pagination/dto';
 
@@ -31,6 +31,23 @@ export class CategoriesService {
       );
     } catch (error) {
       this.loggerService.error('Failed to get all categories', error);
+      throw error;
+    }
+  }
+
+  async updateCategory(
+    userId: string,
+    id: string,
+    updateCategoryDto: UpdateCategoryDto,
+  ) {
+    try {
+      await this.categoryRepository.findCategoryAndUpdate(
+        userId,
+        id,
+        updateCategoryDto,
+      );
+    } catch (error) {
+      this.loggerService.error('Failed to update category', error);
       throw error;
     }
   }
