@@ -5,9 +5,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/common/pagination/dto';
 import { paginate } from 'src/common/pagination/paginate.helper';
 import { UpdateCategoryDto } from '../dto';
+import { ICategoryRepository } from '../interfaces';
 
 @Injectable()
-export class CategoryRepository {
+export class CategoryRepository implements ICategoryRepository {
   constructor(
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,

@@ -3,9 +3,9 @@ import { CategoryRepository } from '../repos';
 import { CreateCategoryDto, UpdateCategoryDto } from '../dto';
 import { LoggerService } from 'src/logs/logger.service';
 import { PaginationDto } from 'src/common/pagination/dto';
-
+import { ICategoryService } from '../interfaces';
 @Injectable()
-export class CategoriesService {
+export class CategoriesService implements ICategoryService {
   constructor(
     private readonly categoryRepository: CategoryRepository,
     private readonly loggerService: LoggerService,
