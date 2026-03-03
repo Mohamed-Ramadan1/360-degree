@@ -51,4 +51,13 @@ export class CategoriesService {
       throw error;
     }
   }
+
+  async deleteCategory(userId: string, id: string) {
+    try {
+      await this.categoryRepository.deleteCategory(userId, id);
+    } catch (error) {
+      this.loggerService.error('Failed to delete category', error);
+      throw error;
+    }
+  }
 }

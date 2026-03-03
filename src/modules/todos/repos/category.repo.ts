@@ -60,4 +60,14 @@ export class CategoryRepository {
       throw new NotFoundException('No category match provided id');
     }
   }
+
+  async deleteCategory(userId: string, id: string) {
+    const result = await this.categoryRepository.delete({
+      id,
+      ownerId: userId,
+    });
+    if (result.affected === 0) {
+      throw new NotFoundException('No category match provided id');
+    }
+  }
 }

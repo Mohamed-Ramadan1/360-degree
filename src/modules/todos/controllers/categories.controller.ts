@@ -178,6 +178,29 @@ export class CategoriesController {
     };
   }
 
+  @ApiOperation({
+    summary: 'Delete a category',
+    description:
+      'Deletes an existing category for the authenticated user. This action is irreversible and will remove the category and all associated tasks.',
+  })
+  @ApiOkResponse({
+    description: 'Category deleted successfully',
+    type: OperationSuccessDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid category ID',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
   @Delete(':id')
-  deleteCategory() {}
+  async deleteCategory(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Req() req,
+  ): Promise<OperationSuccessDto> {
+    await this.categoryService.deleteCategory(req.user.id, id);
+    return {
+      message: 'Category deleted successfully',
+    };
+  }
 }
