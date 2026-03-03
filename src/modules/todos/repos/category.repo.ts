@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { Category } from '../entities/category.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { PaginationDto } from 'src/common/pagination/dto';
+import { paginate } from 'src/common/pagination/paginate.helper';
 
 @Injectable()
 export class CategoryRepository {
@@ -32,5 +34,15 @@ export class CategoryRepository {
     return await this.categoryRepository.findOne({
       where: { id: categoryId, ownerId: userId },
     });
+  }
+
+  async getAllCategories(userId: string, paginationDto: PaginationDto) {
+    return paginate(
+      this.categoryRepository,
+      {
+        ownerId: userId,
+      },
+      paginationDto,
+    );
   }
 }

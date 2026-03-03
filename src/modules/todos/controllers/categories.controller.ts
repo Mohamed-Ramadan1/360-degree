@@ -3,8 +3,11 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Patch,
   Post,
+  Query,
   Req,
   UseInterceptors,
 } from '@nestjs/common';
@@ -16,9 +19,11 @@ import {
   ApiBody,
   ApiOkResponse,
   ApiOperation,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
 import { CategoryCreateResponse } from '../dto/response/category-create-response';
+import { PaginationDto } from 'src/common/pagination/dto/requests/pagination.dto';
 
 @UseInterceptors(TransformResponseInterceptor)
 @ApiBearerAuth('JWT-auth')
@@ -46,19 +51,18 @@ export class CategoriesController {
         summary: 'Valid category creation request',
         value: {
           name: 'Work',
-          description: 'Tasks related to work and professional life',
         },
       },
       invalid: {
         summary: 'Invalid category creation request',
         value: {
           name: '',
-          description: '',
         },
       },
     },
   })
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   async createCategory(
     @Body() createCategoryDto: CreateCategoryDto,
     @Req() req,
@@ -73,8 +77,52 @@ export class CategoriesController {
     };
   }
 
+  @ApiOperation({
+    summary: 'Get all categories',
+    description:
+      'Retrieves a paginated list of all categories for the authenticated user. This allows users to see all their categories and manage them effectively.',
+  })
+  @ApiOkResponse({
+    description: 'Categories retrieved successfully',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid pagination parameters',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiOkResponse({
+    description: 'Categories retrieved successfully',
+    example: {
+      message: 'Categories retrieved successfully',
+      categories: [
+        {
+          id: 1,
+          name: 'Work',
+          createdAt: '2023-01-01T00:00:00.000Z',
+          updatedAt: '2023-01-01T00:00:00.000Z',
+        },
+      ],
+      meta: {
+        total: 1,
+        page: 1,
+        limit: 15,
+        totalPages: 1,
+      },
+    },
+  })
   @Get()
-  getAllCategories() {}
+  @HttpCode(HttpStatus.OK)
+  async getAllCategories(@Query() paginationDto: PaginationDto, @Req() req) {
+    const result = await this.categoryService.getAllCategories(
+      req.user.id,
+      paginationDto,
+    );
+    return {
+      message: 'Categories retrieved successfully',
+      ...result,
+    };
+  }
 
   @Patch(':id')
   updateCategory() {}

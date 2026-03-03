@@ -10,7 +10,7 @@ import { Category } from './entities/category.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Todo, Category])],
-  controllers: [TodosController, CategoriesController],
+  controllers: [CategoriesController, TodosController],
   providers: [
     TodoService,
     TodoRepository,
