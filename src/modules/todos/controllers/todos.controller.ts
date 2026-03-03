@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   Req,
   UseInterceptors,
 } from '@nestjs/common';
@@ -34,6 +35,7 @@ import { TransformResponseInterceptor } from 'src/common/interceptors/transform-
 import { ITodo } from '../interfaces/entities/todo.interface';
 import { OperationSuccessDto } from 'src/modules/auth/dtos';
 import { Throttle } from '@nestjs/throttler';
+import { PaginationDto } from 'src/common/pagination/dto/requests/pagination.dto';
 
 @Throttle({ default: { limit: 25, ttl: 600000 } })
 @UseInterceptors(TransformResponseInterceptor)
@@ -109,6 +111,12 @@ export class TodosController {
     description:
       'Retrieves a list of all todo items for the authenticated user.',
   })
+  @ApiBadRequestResponse({
+    description: 'Invalid request',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
   @ApiOkResponse({
     description: 'Todos retrieved successfully',
     type: GetAllTodosResponse,
@@ -136,11 +144,14 @@ export class TodosController {
   })
   @Get()
   @HttpCode(HttpStatus.OK)
-  async getAllTodos() {
-    const todos = await this.todoService.getAllTodos();
+  async getAllTodos(@Query() paginationDto: PaginationDto, @Req() req) {
+    const result = await this.todoService.getAllTodos(
+      req.user.id,
+      paginationDto,
+    );
     return {
       message: 'Todos retrieved successfully',
-      todos,
+      ...result,
     };
   }
 
@@ -177,8 +188,8 @@ export class TodosController {
   })
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async getTodoById(@Param('id', new ParseUUIDPipe()) id: string) {
-    const todo: ITodo = await this.todoService.getTodoById(id);
+  async getTodoById(@Param('id', new ParseUUIDPipe()) id: string, @Req() req) {
+    const todo: ITodo = await this.todoService.getTodoById(id, req.user.id);
     return {
       message: 'Todo retrieved successfully',
       todo,
@@ -272,8 +283,9 @@ export class TodosController {
   @HttpCode(HttpStatus.OK)
   async deleteTodo(
     @Param('id', new ParseUUIDPipe()) id: string,
+    @Req() req,
   ): Promise<OperationSuccessDto> {
-    await this.todoService.deleteTodo(id);
+    await this.todoService.deleteTodo(id, req.user.id);
     return {
       message: 'Todo deleted successfully',
     };
@@ -325,8 +337,13 @@ export class TodosController {
   async updateTodoStatus(
     @Body() updateTodoStatusDto: UpdateTodoStatusDto,
     @Param('id', new ParseUUIDPipe()) id: string,
+    @Req() req,
   ): Promise<OperationSuccessDto> {
-    await this.todoService.updateTodoStatus(id, updateTodoStatusDto);
+    await this.todoService.updateTodoStatus(
+      id,
+      updateTodoStatusDto,
+      req.user.id,
+    );
 
     return {
       message: 'Todo status updated successfully',
