@@ -1,4 +1,4 @@
-import { AdminCreateUserDto } from 'src/modules/users/dto';
+import { AdminCreateUserDto, GetUsersDto } from 'src/modules/users/dto';
 import { IUser } from '../entities/user.interface';
 
 export interface IUserCrudService {
@@ -6,7 +6,7 @@ export interface IUserCrudService {
 
   //   updateUser(): Promise<void>;
   getUser(userId: string): Promise<IUser>;
-  listUsers(): Promise<IUser[]>;
+  listUsers(getUsersDto: GetUsersDto);
 }
 
 export type DeletionRequestData = {

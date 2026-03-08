@@ -8,6 +8,7 @@ import { PasswordHelperService } from './services/password-helper.service';
 import { ResourceCleanupService } from './services/resource-cleanup.service';
 import { OtpService } from './services/otp.service';
 import { SmsSenderService } from './services/sms-sender.service';
+import { PaginationService } from './pagination/paginate.service';
 
 @Global()
 @Module({
@@ -20,6 +21,7 @@ import { SmsSenderService } from './services/sms-sender.service';
     ResourceCleanupService,
     OtpService,
     SmsSenderService,
+    PaginationService,
   ],
   exports: [
     EmailSenderService,
@@ -29,6 +31,7 @@ import { SmsSenderService } from './services/sms-sender.service';
     ResourceCleanupService,
     OtpService,
     SmsSenderService,
+    PaginationService,
   ],
 })
 export class CommonModule {}

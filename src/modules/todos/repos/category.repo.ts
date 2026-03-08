@@ -2,16 +2,16 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Category } from '../entities/category.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PaginationDto } from 'src/common/pagination/dto';
-import { paginate } from 'src/common/pagination/paginate.helper';
-import { UpdateCategoryDto } from '../dto';
+import { PaginationService } from 'src/common/pagination/paginate.service';
+import { GetCategoriesDto, UpdateCategoryDto } from '../dto';
 import { ICategoryRepository } from '../interfaces';
-
+import { v7 as uuidv7 } from 'uuid';
 @Injectable()
 export class CategoryRepository implements ICategoryRepository {
   constructor(
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
+    private readonly paginationService: PaginationService,
   ) {}
 
   get repository(): Repository<Category> {
@@ -24,6 +24,7 @@ export class CategoryRepository implements ICategoryRepository {
   ): Promise<Category> {
     const category = this.categoryRepository.create({
       ...createCategoryDto,
+      id: uuidv7(),
       ownerId: userId,
     });
     return await this.categoryRepository.save(category);
@@ -38,14 +39,17 @@ export class CategoryRepository implements ICategoryRepository {
     });
   }
 
-  async getAllCategories(userId: string, paginationDto: PaginationDto) {
-    return paginate(
-      this.categoryRepository,
-      {
-        ownerId: userId,
+  async getAllCategories(userId: string, dto: GetCategoriesDto) {
+    const queryBuilder = this.categoryRepository
+      .createQueryBuilder('categories')
+      .where('categories.ownerId = :userId', { userId });
+
+    return this.paginationService.paginate(queryBuilder, dto, {
+      alias: 'categories',
+      filters: {
+        name: { value: dto.name, operator: 'like' },
       },
-      paginationDto,
-    );
+    });
   }
 
   async findCategoryAndUpdate(

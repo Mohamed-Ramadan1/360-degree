@@ -5,7 +5,7 @@ import { LoggerService } from 'src/logs/logger.service';
 
 import { IUser } from '../interfaces/entities/user.interface';
 
-import { AdminCreateUserDto } from '../dto';
+import { AdminCreateUserDto, GetUsersDto } from '../dto';
 import { generateWelcomeEmail } from 'src/modules/auth/emails/templates/wellcomEmail';
 import { PasswordHelperService } from 'src/common/services/password-helper.service';
 
@@ -92,10 +92,10 @@ export class UsersCrudService implements IUserCrudService {
     }
   }
 
-  async listUsers(): Promise<IUser[]> {
+  async listUsers(getUsersDto: GetUsersDto) {
     try {
-      const users: IUser[] = await this.userRepository.findAll();
-      return users;
+      const result = await this.userRepository.findAll(getUsersDto);
+      return result;
     } catch (error: unknown) {
       const err = error instanceof Error ? error : new Error(String(error));
       this.logger.error(`Error listing users: ${err.message}`, err);

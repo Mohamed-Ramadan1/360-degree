@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CategoryRepository } from '../repos';
-import { CreateCategoryDto, UpdateCategoryDto } from '../dto';
+import { CreateCategoryDto, GetCategoriesDto, UpdateCategoryDto } from '../dto';
 import { LoggerService } from 'src/logs/logger.service';
-import { PaginationDto } from 'src/common/pagination/dto';
 import { ICategoryService } from '../interfaces';
 @Injectable()
 export class CategoriesService implements ICategoryService {
@@ -23,11 +22,11 @@ export class CategoriesService implements ICategoryService {
     }
   }
 
-  async getAllCategories(userId: string, paginationDto: PaginationDto) {
+  async getAllCategories(userId: string, getCategoriesDto: GetCategoriesDto) {
     try {
       return await this.categoryRepository.getAllCategories(
         userId,
-        paginationDto,
+        getCategoriesDto,
       );
     } catch (error) {
       this.loggerService.error('Failed to get all categories', error);

@@ -1,12 +1,12 @@
 import { PaginatedResponseDto } from 'src/common/pagination/dto/response/paginated-response.dto';
 import { ITodo } from '../entities/todo.interface';
-import { PaginationDto } from 'src/common/pagination/dto';
+import { GetTodosDto } from '../../dto';
 
 export interface ITodoService {
   createTodo(userId: string, todoData: Partial<ITodo>): Promise<ITodo>;
   getAllTodos(
     userId: string,
-    paginationDto: PaginationDto,
+    getTodosDto: GetTodosDto,
   ): Promise<PaginatedResponseDto<ITodo>>;
   getTodoById(id: string, userId: string): Promise<ITodo>;
   updateTodo(

@@ -5,12 +5,15 @@ import { Repository } from 'typeorm';
 import { IUser } from '../interfaces/entities/user.interface';
 import { UpdateProfileData } from '../interfaces/services/profileManagementService.interface';
 import { IUserRepository } from '../interfaces';
+import { PaginationService } from 'src/common/pagination/paginate.service';
+import { GetUsersDto } from '../dto';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly paginationService: PaginationService,
   ) {}
 
   get repository(): Repository<User> {
@@ -45,9 +48,32 @@ export class UserRepository implements IUserRepository {
     return user;
   }
 
-  async findAll(): Promise<IUser[]> {
-    return await this.userRepository.find({
-      select: ['id', 'email', 'name', 'isVerified', 'createdAt'],
+  async findAll(dto: GetUsersDto) {
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('users')
+      .select([
+        'users.id',
+        'users.name',
+        'users.email',
+        'users.isActive',
+        'users.isVerified',
+        'users.isDisabled',
+        'users.roles',
+        'users.phoneNumber',
+        'users.lastLoginAt',
+        'users.createdAt',
+      ]);
+
+    return this.paginationService.paginate(queryBuilder, dto, {
+      alias: 'users',
+      filters: {
+        name: { value: dto.name, operator: 'like' },
+        email: { value: dto.email, operator: 'like' },
+        roles: { value: dto.role, operator: 'any' },
+        isActive: { value: dto.isActive },
+        isVerified: { value: dto.isVerified },
+        isDisabled: { value: dto.isDisabled },
+      },
     });
   }
 

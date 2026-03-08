@@ -3,15 +3,17 @@ import { Todo } from '../entities/todo.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ITodoRepository } from '../interfaces';
-import { paginate } from 'src/common/pagination/paginate.helper';
-import { PaginationDto } from 'src/common/pagination/dto/requests/pagination.dto';
+import { PaginationService } from 'src/common/pagination/paginate.service';
 import { PaginatedResponseDto } from 'src/common/pagination/dto';
+import { v7 as uuidv7 } from 'uuid';
+import { GetTodosDto } from '../dto';
 
 @Injectable()
 export class TodoRepository implements ITodoRepository {
   constructor(
     @InjectRepository(Todo)
     private readonly todoRepository: Repository<Todo>,
+    private readonly paginationService: PaginationService,
   ) {}
 
   get repository(): Repository<Todo> {
@@ -21,6 +23,7 @@ export class TodoRepository implements ITodoRepository {
   async createTodo(userId: string, todoData: Partial<Todo>): Promise<Todo> {
     const todo = this.todoRepository.create({
       ...todoData,
+      id: uuidv7(),
       ownerId: userId,
     });
     return this.todoRepository.save(todo);
@@ -28,13 +31,20 @@ export class TodoRepository implements ITodoRepository {
 
   async getAllTodos(
     userId: string,
-    paginationDto: PaginationDto,
+    getTodosDto: GetTodosDto,
   ): Promise<PaginatedResponseDto<Todo>> {
-    // return this.todoRepository.find({
-    //   where: { ownerId: userId },
-    // });
+    const queryBuilder = this.todoRepository
+      .createQueryBuilder('todos')
+      .where('todos.ownerId = :userId', { userId });
 
-    return paginate(this.todoRepository, { ownerId: userId }, paginationDto);
+    return this.paginationService.paginate(queryBuilder, getTodosDto, {
+      alias: 'todos',
+      filters: {
+        status: { value: getTodosDto.status },
+        priority: { value: getTodosDto.priority },
+        isPersonal: { value: getTodosDto.isPersonal },
+      },
+    });
   }
 
   async findOneById(id: string, userId: string): Promise<Todo> {

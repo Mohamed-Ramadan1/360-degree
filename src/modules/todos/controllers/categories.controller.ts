@@ -14,19 +14,20 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { CategoriesService } from '../services/category.service';
-import { CreateCategoryDto, UpdateCategoryDto } from '../dto';
+import { CreateCategoryDto, GetCategoriesDto, UpdateCategoryDto } from '../dto';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
 import { CategoryCreateResponse } from '../dto/response/category-create-response';
-import { PaginationDto } from 'src/common/pagination/dto/requests/pagination.dto';
 import { OperationSuccessDto } from 'src/modules/auth/dtos';
+import { GetAllCategoriesResponse } from '../dto/response/get-categories.response';
 
 @UseInterceptors(TransformResponseInterceptor)
 @ApiBearerAuth('JWT-auth')
@@ -96,9 +97,10 @@ export class CategoriesController {
   })
   @ApiOkResponse({
     description: 'Categories retrieved successfully',
+    type: GetAllCategoriesResponse,
     example: {
       message: 'Categories retrieved successfully',
-      categories: [
+      data: [
         {
           id: 1,
           name: 'Work',
@@ -107,19 +109,36 @@ export class CategoriesController {
         },
       ],
       meta: {
-        total: 1,
-        page: 1,
-        limit: 15,
-        totalPages: 1,
+        hasNextPage: false,
+        nextCursor: null,
+        limit: 50,
+      },
+    },
+  })
+  @ApiQuery({
+    name: 'GetCategoriesDto',
+    description:
+      'The query parameters for retrieving categories. This includes pagination parameters.',
+    type: GetCategoriesDto,
+    examples: {
+      valid: {
+        summary: 'Valid query with pagination',
+        value: {
+          limit: 50,
+          name: 'Work',
+        },
       },
     },
   })
   @Get()
   @HttpCode(HttpStatus.OK)
-  async getAllCategories(@Query() paginationDto: PaginationDto, @Req() req) {
+  async getAllCategories(
+    @Query() getCategoriesDto: GetCategoriesDto,
+    @Req() req,
+  ) {
     const result = await this.categoryService.getAllCategories(
       req.user.id,
-      paginationDto,
+      getCategoriesDto,
     );
     return {
       message: 'Categories retrieved successfully',

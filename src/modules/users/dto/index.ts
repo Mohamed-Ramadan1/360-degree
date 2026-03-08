@@ -12,3 +12,5 @@ export { BulkRolesRemoveDto } from './requests/bulk-roles-remove.dto';
 export { BulkRolesRemoveResponseDto } from './response/bulk-roles-remove.dto';
 export { RetrieveUserRolesResponseDto } from './response/retrieval-user-roles.dto';
 export { VerifyPhoneNumberDto } from './requests/verify-phone-number.dto';
+export { GetUsersDto } from './requests/get-users.dto';
+export { GetUsersResponseDto } from './response/get-users-response.dto';

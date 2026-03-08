@@ -1,9 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { TodoCreateDto, UpdateTodoDto, UpdateTodoStatusDto } from '../dto';
+import {
+  GetTodosDto,
+  TodoCreateDto,
+  UpdateTodoDto,
+  UpdateTodoStatusDto,
+} from '../dto';
 import { CategoryRepository, TodoRepository } from '../repos';
 import { LoggerService } from 'src/logs/logger.service';
 import { ITodoService } from '../interfaces';
-import { PaginationDto } from 'src/common/pagination/dto/requests/pagination.dto';
 
 @Injectable()
 export class TodoService implements ITodoService {
@@ -27,9 +31,9 @@ export class TodoService implements ITodoService {
     }
   }
 
-  async getAllTodos(userId: string, paginationDto: PaginationDto) {
+  async getAllTodos(userId: string, getTodosDto: GetTodosDto) {
     try {
-      return await this.todoRepository.getAllTodos(userId, paginationDto);
+      return await this.todoRepository.getAllTodos(userId, getTodosDto);
     } catch (error) {
       this.logger.error('Failed to retrieve todos', error);
       throw error;

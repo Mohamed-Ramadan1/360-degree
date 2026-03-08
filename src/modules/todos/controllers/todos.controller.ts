@@ -16,6 +16,7 @@ import {
 import {
   GetAllTodosResponse,
   GetTodoResponse,
+  GetTodosDto,
   TodoCreateDto,
   TodoCreateResponse,
   UpdateTodoDto,
@@ -29,13 +30,13 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
 import { ITodo } from '../interfaces/entities/todo.interface';
 import { OperationSuccessDto } from 'src/modules/auth/dtos';
 import { Throttle } from '@nestjs/throttler';
-import { PaginationDto } from 'src/common/pagination/dto/requests/pagination.dto';
 
 @Throttle({ default: { limit: 25, ttl: 600000 } })
 @UseInterceptors(TransformResponseInterceptor)
@@ -122,7 +123,7 @@ export class TodosController {
     type: GetAllTodosResponse,
     example: {
       message: 'Todos retrieved successfully',
-      todos: [
+      data: [
         {
           id: '123e4567-e89b-12d3-a456-426614174000',
           title: 'Buy groceries',
@@ -140,15 +141,37 @@ export class TodosController {
           otherInfo: '...',
         },
       ],
+      meta: {
+        hasNextPage: false,
+        nextCursor: null,
+        limit: 2,
+      },
+    },
+  })
+  @ApiQuery({
+    name: 'GetTodosDto',
+    description:
+      'The query parameters for retrieving todos. This includes pagination parameters, as well as optional filters for title, priority, and status.',
+    type: GetTodosDto,
+    examples: {
+      valid: {
+        summary: 'Valid query with pagination and filters',
+        value: {
+          page: 1,
+          limit: 10,
+          priority: 'High',
+          status: 'Pending',
+        },
+      },
     },
   })
   @Get()
   @HttpCode(HttpStatus.OK)
-  async getAllTodos(@Query() paginationDto: PaginationDto, @Req() req) {
-    const result = await this.todoService.getAllTodos(
-      req.user.id,
-      paginationDto,
-    );
+  async getAllTodos(
+    @Query() getTodosDto: GetTodosDto,
+    @Req() req,
+  ): Promise<GetAllTodosResponse> {
+    const result = await this.todoService.getAllTodos(req.user.id, getTodosDto);
     return {
       message: 'Todos retrieved successfully',
       ...result,

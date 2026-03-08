@@ -7,6 +7,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -18,6 +19,8 @@ import { TransformResponseInterceptor } from 'src/common/interceptors/transform-
 import {
   AdminCreateUserDto,
   AdminCreateUserResponseDto,
+  GetUsersDto,
+  GetUsersResponseDto,
   RetrievalUserResponseDto,
   RetrievalUsersResponseDto,
 } from '../dto';
@@ -29,6 +32,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -122,11 +126,10 @@ export class UsersCrudController {
   })
   @ApiOkResponse({
     description: 'Users retrieved successfully',
-    type: RetrievalUsersResponseDto,
+    type: GetUsersResponseDto,
     example: {
       message: 'Users retrieved successfully',
-      status: 'success',
-      users: [
+      data: [
         {
           id: 'user-id-1',
           email: 'user1@example.com',
@@ -146,16 +149,44 @@ export class UsersCrudController {
           otherInfo: '...',
         },
       ],
+      meta: {
+        hasNextPage: false,
+        nextCursor: null,
+        limit: 20,
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid query parameters',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User not authenticated',
+  })
+  @ApiQuery({
+    name: 'GetUsersDto',
+    description:
+      'The query parameters for retrieving users. This includes pagination and filtering parameters.',
+    type: GetUsersDto,
+    examples: {
+      valid: {
+        summary: 'Valid query with pagination and filters',
+        value: {
+          limit: 20,
+          name: 'John',
+          email: 'test@example.com',
+        },
+      },
     },
   })
   @Get()
   @HttpCode(HttpStatus.OK)
-  async getUsers() {
-    const users = await this.usersCrudService.listUsers();
+  async getUsers(
+    @Query() getUsersDto: GetUsersDto,
+  ): Promise<GetUsersResponseDto> {
+    const result = await this.usersCrudService.listUsers(getUsersDto);
     return {
       message: 'Users retrieved successfully',
-      status: 'success',
-      users,
+      ...result,
     };
   }
 
