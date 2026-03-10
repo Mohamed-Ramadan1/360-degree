@@ -11,12 +11,10 @@ import {
 import { Todo } from './todo.entity';
 
 @Entity('reminders')
+@Index(['reminderAt', 'isSent', 'isEnabled'])
 export class Reminder {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  @Column({ type: 'int', nullable: false })
-  daysBefore: number;
 
   @Column({ type: 'timestamptz', nullable: false })
   reminderAt: Date; // dueDate - daysBefore

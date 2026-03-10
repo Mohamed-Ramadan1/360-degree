@@ -4,4 +4,5 @@ export enum QueueNames {
   // USER_DELETION = 'user-deletion',
   RESOURCE_CLEANUP = 'resource-cleanup',
   SMS = 'sms',
+  REMINDER = 'reminder',
 }

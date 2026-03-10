@@ -8,3 +8,4 @@ export { UpdateTodoStatusDto } from './requests/update-todo-status.dto';
 export { UpdateCategoryDto } from './requests/update-category.dto';
 export { GetTodosDto } from './requests/get-todos.dto';
 export { GetCategoriesDto } from './requests/get-categories.dto';
+export { ReminderCreateDto } from './requests/reminder-create.dto';

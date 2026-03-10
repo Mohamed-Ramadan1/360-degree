@@ -5,6 +5,7 @@ import { BullModule } from '@nestjs/bullmq';
 import {
   bullMQConfig,
   emailQueueConfig,
+  reminderQueueConfig,
   resourceCleanupQueueConfig,
   smsQueueConfig,
 } from './config/bullmq.config';
@@ -18,6 +19,9 @@ import { ResourceCleanupService } from 'src/common/services/resource-cleanup.ser
 import { ResourceCleanupProcessor } from './processors/resourceCleanup/resource-cleanup.processor';
 import { SmsQueueService } from './services/sms-queue.service';
 import { SmsProcessor } from './processors/sms/sms.processor';
+import { ReminderQueueService } from './services/reminder-queue.service';
+import { ReminderProcessor } from './processors/reminders/reminder.processor';
+import { TodosModule } from 'src/modules';
 @Global()
 @Module({
   imports: [
@@ -25,6 +29,8 @@ import { SmsProcessor } from './processors/sms/sms.processor';
     BullModule.registerQueue(emailQueueConfig),
     BullModule.registerQueue(resourceCleanupQueueConfig),
     BullModule.registerQueue(smsQueueConfig),
+    BullModule.registerQueue(reminderQueueConfig),
+    TodosModule,
   ],
 
   providers: [
@@ -36,6 +42,8 @@ import { SmsProcessor } from './processors/sms/sms.processor';
     ResourceCleanupQueueService,
     SmsProcessor,
     SmsQueueService,
+    ReminderQueueService,
+    ReminderProcessor,
   ],
   exports: [
     EmailProcessor,
@@ -45,6 +53,7 @@ import { SmsProcessor } from './processors/sms/sms.processor';
     ResourceCleanupQueueService,
     SmsProcessor,
     SmsQueueService,
+    ReminderQueueService,
   ],
 })
 export class QueuesModule {}

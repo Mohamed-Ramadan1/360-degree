@@ -61,3 +61,16 @@ export const smsQueueConfig = {
     },
   },
 };
+
+export const reminderQueueConfig = {
+  name: QueueNames.REMINDER,
+  defaultJobOptions: {
+    removeOnComplete: 5,
+    removeOnFail: 5,
+    attempts: 3,
+    backoff: {
+      type: 'exponential',
+      delay: 2000,
+    },
+  },
+};
