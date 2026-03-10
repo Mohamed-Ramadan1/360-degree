@@ -28,8 +28,10 @@ import { TransformResponseInterceptor } from 'src/common/interceptors/transform-
 import { CategoryCreateResponse } from '../dto/response/category-create-response';
 import { OperationSuccessDto } from 'src/modules/auth/dtos';
 import { GetAllCategoriesResponse } from '../dto/response/get-categories.response';
+import { Throttle } from '@nestjs/throttler';
 
 @UseInterceptors(TransformResponseInterceptor)
+@Throttle({ default: { limit: 25, ttl: 600000 } })
 @ApiBearerAuth('JWT-auth')
 @Controller('categories')
 export class CategoriesController {

@@ -9,21 +9,19 @@ import {
   Index,
 } from 'typeorm';
 import { Todo } from './todo.entity';
+import { IReminder } from '../interfaces';
 
 @Entity('reminders')
-@Index(['reminderAt', 'isSent', 'isEnabled'])
-export class Reminder {
+@Index(['reminderAt', 'isSent'])
+export class Reminder implements IReminder {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'timestamptz', nullable: false })
-  reminderAt: Date; // dueDate - daysBefore
+  reminderAt: Date;
 
   @Column({ type: 'boolean', default: false })
   isSent: boolean;
-
-  @Column({ type: 'boolean', default: true })
-  isEnabled: boolean;
 
   @Index()
   @Column({ type: 'uuid', nullable: false })

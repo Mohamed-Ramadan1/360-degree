@@ -17,7 +17,6 @@ export class ReminderRepository {
       where: {
         reminderAt: LessThanOrEqual(new Date()),
         isSent: false,
-        isEnabled: true,
         todo: {
           owner: {
             notificationsEnabled: true,
@@ -50,5 +49,12 @@ export class ReminderRepository {
   async create(reminderData: Partial<Reminder>): Promise<Reminder> {
     const reminder = this.reminderRepository.create(reminderData);
     return this.reminderRepository.save(reminder);
+  }
+
+  async findByTodoId(todoId: string): Promise<Reminder[]> {
+    return this.reminderRepository.find({
+      where: { todoId },
+      order: { reminderAt: 'ASC' },
+    });
   }
 }

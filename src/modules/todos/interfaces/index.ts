@@ -1,5 +1,6 @@
 export { ITodo } from './entities/todo.interface';
 export { ICategory } from './entities/category.interface';
+export { IReminder } from './entities/reminder.interface';
 export { ITodoService } from './services/todo-service-interface';
 export { ITodoRepository } from './repos/todo-repository-interface';
 export { ICategoryRepository } from './repos/category-repository-interface';

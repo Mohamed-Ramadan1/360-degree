@@ -9,3 +9,5 @@ export { UpdateCategoryDto } from './requests/update-category.dto';
 export { GetTodosDto } from './requests/get-todos.dto';
 export { GetCategoriesDto } from './requests/get-categories.dto';
 export { ReminderCreateDto } from './requests/reminder-create.dto';
+export { ReminderCreateResponse } from './response/reminder-create-response.dto';
+export { GetRemindersResponse } from './response/get-reminders-response';
