@@ -83,4 +83,18 @@ export class TodoRepository implements ITodoRepository {
       throw new NotFoundException('No todo match provided id');
     }
   }
+
+  async findTodoWithReminders(todoId: string, userId: string) {
+    return this.todoRepository.findOne({
+      where: { id: todoId, ownerId: userId },
+      relations: ['reminders'],
+      select: {
+        id: true,
+        reminders: {
+          id: true,
+          reminderAt: true,
+        },
+      },
+    });
+  }
 }

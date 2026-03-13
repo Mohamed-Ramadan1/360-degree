@@ -14,6 +14,7 @@ import {
   GetRemindersResponse,
   ReminderCreateDto,
   ReminderCreateResponse,
+  ReminderUpdateDto,
 } from '../dto';
 import { ReminderService } from '../services/reminder.service';
 import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
@@ -24,12 +25,15 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
+import { OperationSuccessDto } from 'src/modules/auth/dtos';
 
 @UseInterceptors(TransformResponseInterceptor)
 @Throttle({ default: { limit: 25, ttl: 600000 } })
+@ApiTags('Reminders')
 @ApiBearerAuth('JWT-auth')
 @Controller(':id/reminders')
 export class RemindersController {
@@ -130,10 +134,108 @@ export class RemindersController {
   }
 
   // Update a specific reminder for a specific todo
+  @ApiOperation({
+    summary: 'Update a specific reminder for a specific todo',
+    description:
+      'Updates a specific reminder associated with a todo. The user must be the owner of the todo to update its reminders.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The UUID of the todo to which the reminder belongs',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiParam({
+    name: 'reminderId',
+    description: 'The UUID of the reminder to be updated',
+    example: '123e4567-e89b-12d3-a456-426614174001',
+  })
+  @ApiBody({
+    type: ReminderUpdateDto,
+    description: 'The data required to update an existing reminder',
+    examples: {
+      valid: {
+        summary: 'Valid reminder update request',
+        value: {
+          reminderAt: '2024-07-01T12:00:00Z',
+        },
+      },
+      invalid: {
+        summary: 'Invalid reminder update request',
+        value: {
+          reminderAt: 'invalid-date-format',
+        },
+      },
+    },
+  })
+  @ApiOkResponse({
+    description: 'The reminder was updated successfully',
+    type: OperationSuccessDto,
+    example: {
+      message: 'Reminder updated successfully',
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description:
+      'Unauthorized. The user must be authenticated to update a reminder.',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'Invalid input data. The request body must contain valid time and message fields.',
+  })
   @Patch(':reminderId')
-  updateReminder() {}
+  async updateReminder(
+    @Param('id', new ParseUUIDPipe()) todoId: string,
+    @Param('reminderId', new ParseUUIDPipe()) reminderId: string,
+    @Body() reminderDto: ReminderUpdateDto,
+    @Req() req,
+  ): Promise<OperationSuccessDto> {
+    await this.reminderService.updateReminder(
+      todoId,
+      reminderId,
+      reminderDto,
+      req.user.id,
+    );
+    return { message: 'Reminder updated successfully' };
+  }
 
   // Delete a specific reminder for a specific todo
+  @ApiOperation({
+    summary: 'Delete a specific reminder for a specific todo',
+    description:
+      'Deletes a specific reminder associated with a todo. The user must be the owner of the todo to delete its reminders.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The UUID of the todo from which to delete the reminder',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiParam({
+    name: 'reminderId',
+    description: 'The UUID of the reminder to be deleted',
+    example: '123e4567-e89b-12d3-a456-426614174001',
+  })
+  @ApiOkResponse({
+    description: 'The reminder was deleted successfully',
+    type: OperationSuccessDto,
+    example: {
+      message: 'Reminder deleted successfully',
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description:
+      'Unauthorized. The user must be authenticated to delete a reminder.',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'Invalid input data. The provided IDs must be valid UUIDs corresponding to existing todo and reminder.',
+  })
   @Delete(':reminderId')
-  deleteReminder() {}
+  async deleteReminder(
+    @Param('id', new ParseUUIDPipe()) todoId: string,
+    @Param('reminderId', new ParseUUIDPipe()) reminderId: string,
+    @Req() req,
+  ): Promise<OperationSuccessDto> {
+    await this.reminderService.deleteReminder(todoId, reminderId, req.user.id);
+    return { message: 'Reminder deleted successfully' };
+  }
 }

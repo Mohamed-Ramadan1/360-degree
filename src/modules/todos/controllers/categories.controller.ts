@@ -22,6 +22,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
+  ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
@@ -32,6 +33,7 @@ import { Throttle } from '@nestjs/throttler';
 
 @UseInterceptors(TransformResponseInterceptor)
 @Throttle({ default: { limit: 25, ttl: 600000 } })
+@ApiTags('Categories')
 @ApiBearerAuth('JWT-auth')
 @Controller('categories')
 export class CategoriesController {

@@ -1,6 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Reminder } from '../entities/reminder.entity';
-import { LessThanOrEqual, Repository } from 'typeorm';
+import { Between, LessThanOrEqual, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoggerService } from 'src/logs/logger.service';
 
@@ -13,15 +17,12 @@ export class ReminderRepository {
   ) {}
 
   async findDueReminders() {
+    const now = new Date();
+    const oneMinuteAhead = new Date(now.getTime() + 60 * 1000);
     return this.reminderRepository.find({
       where: {
-        reminderAt: LessThanOrEqual(new Date()),
+        reminderAt: LessThanOrEqual(oneMinuteAhead),
         isSent: false,
-        todo: {
-          owner: {
-            notificationsEnabled: true,
-          },
-        },
       },
       relations: ['todo', 'todo.owner'],
       select: {
@@ -56,5 +57,34 @@ export class ReminderRepository {
       where: { todoId },
       order: { reminderAt: 'ASC' },
     });
+  }
+
+  async checkTooCloseReminders(
+    todoId: string,
+    reminderAt: Date,
+  ): Promise<Reminder | null> {
+    const tooClose = await this.reminderRepository.findOne({
+      where: {
+        todoId,
+        reminderAt: Between(
+          new Date(reminderAt.getTime() - 15 * 60 * 1000),
+          new Date(reminderAt.getTime() + 15 * 60 * 1000),
+        ),
+      },
+    });
+    return tooClose;
+  }
+
+  async update(id: string, updateData: Partial<Reminder>): Promise<void> {
+    await this.reminderRepository.update(id, updateData);
+  }
+
+  async delete(id: string, todoId: string): Promise<void> {
+    const result = await this.reminderRepository.delete({ id, todoId });
+    if (result.affected === 0) {
+      throw new NotFoundException(
+        'No reminder match provided id in the specified todo',
+      );
+    }
   }
 }

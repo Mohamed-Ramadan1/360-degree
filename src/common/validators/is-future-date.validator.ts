@@ -10,6 +10,6 @@ export class IsFutureDate implements ValidatorConstraintInterface {
   }
 
   defaultMessage() {
-    return 'dueDate must be in the future';
+    return 'Date must be in the future';
   }
 }

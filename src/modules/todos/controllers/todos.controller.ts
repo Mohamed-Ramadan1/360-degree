@@ -31,6 +31,7 @@ import {
   ApiOperation,
   ApiParam,
   ApiQuery,
+  ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
@@ -40,6 +41,7 @@ import { Throttle } from '@nestjs/throttler';
 
 @Throttle({ default: { limit: 25, ttl: 600000 } })
 @UseInterceptors(TransformResponseInterceptor)
+@ApiTags('Todos')
 @ApiBearerAuth('JWT-auth')
 @Controller()
 export class TodosController {

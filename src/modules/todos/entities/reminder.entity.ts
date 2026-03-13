@@ -7,11 +7,13 @@ import {
   ManyToOne,
   JoinColumn,
   Index,
+  Unique,
 } from 'typeorm';
 import { Todo } from './todo.entity';
 import { IReminder } from '../interfaces';
 
 @Entity('reminders')
+@Unique(['todoId', 'reminderAt'])
 @Index(['reminderAt', 'isSent'])
 export class Reminder implements IReminder {
   @PrimaryGeneratedColumn('uuid')

@@ -11,3 +11,4 @@ export { GetCategoriesDto } from './requests/get-categories.dto';
 export { ReminderCreateDto } from './requests/reminder-create.dto';
 export { ReminderCreateResponse } from './response/reminder-create-response.dto';
 export { GetRemindersResponse } from './response/get-reminders-response';
+export { ReminderUpdateDto } from './requests/reminder-update.dto';
