@@ -5,6 +5,7 @@ import { BullModule } from '@nestjs/bullmq';
 import {
   bullMQConfig,
   emailQueueConfig,
+  habitQueueConfig,
   reminderQueueConfig,
   resourceCleanupQueueConfig,
   smsQueueConfig,
@@ -21,7 +22,9 @@ import { SmsQueueService } from './services/sms-queue.service';
 import { SmsProcessor } from './processors/sms/sms.processor';
 import { ReminderQueueService } from './services/reminder-queue.service';
 import { ReminderProcessor } from './processors/reminders/reminder.processor';
-import { TodosModule } from 'src/modules';
+import { HabitsModule, TodosModule } from 'src/modules';
+import { HabitQueueService } from './services/habit-queu.service';
+import { HabitProcessor } from './processors/habits/habit.processor';
 @Global()
 @Module({
   imports: [
@@ -30,7 +33,9 @@ import { TodosModule } from 'src/modules';
     BullModule.registerQueue(resourceCleanupQueueConfig),
     BullModule.registerQueue(smsQueueConfig),
     BullModule.registerQueue(reminderQueueConfig),
+    BullModule.registerQueue(habitQueueConfig),
     TodosModule,
+    HabitsModule,
   ],
 
   providers: [
@@ -44,6 +49,8 @@ import { TodosModule } from 'src/modules';
     SmsQueueService,
     ReminderQueueService,
     ReminderProcessor,
+    HabitQueueService,
+    HabitProcessor,
   ],
   exports: [
     EmailProcessor,
@@ -54,6 +61,7 @@ import { TodosModule } from 'src/modules';
     SmsProcessor,
     SmsQueueService,
     ReminderQueueService,
+    HabitQueueService,
   ],
 })
 export class QueuesModule {}

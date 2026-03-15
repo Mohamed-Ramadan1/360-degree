@@ -70,7 +70,20 @@ export const reminderQueueConfig = {
     attempts: 3,
     backoff: {
       type: 'exponential',
-      delay: 2000,
+      delay: 5000,
+    },
+  },
+};
+
+export const habitQueueConfig = {
+  name: QueueNames.HABIT,
+  defaultJobOptions: {
+    removeOnComplete: 5,
+    removeOnFail: 5,
+    attempts: 3,
+    backoff: {
+      type: 'exponential',
+      delay: 5000,
     },
   },
 };

@@ -5,4 +5,5 @@ export enum QueueNames {
   RESOURCE_CLEANUP = 'resource-cleanup',
   SMS = 'sms',
   REMINDER = 'reminder',
+  HABIT = 'habit',
 }
