@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { IUser } from '../interfaces/entities/user.interface';
 import { UserRoles } from 'src/common/consts';
 import { IUserAuthenticationRepository } from '../interfaces';
-import { v7 as uuidv7 } from 'uuid';
+import { generateId } from 'src/utils';
 
 @Injectable()
 export class UserAuthenticationRepository implements IUserAuthenticationRepository {
@@ -18,7 +18,7 @@ export class UserAuthenticationRepository implements IUserAuthenticationReposito
   ) {}
 
   async createUser(userData: Partial<User>): Promise<IUser> {
-    const user = this.userRepository.create({ ...userData, id: uuidv7() });
+    const user = this.userRepository.create({ ...userData, id: generateId() });
     return this.userRepository.save(user);
   }
 
@@ -90,7 +90,7 @@ export class UserAuthenticationRepository implements IUserAuthenticationReposito
   }): Promise<User> {
     return await this.userRepository.save({
       ...userData,
-      id: uuidv7(),
+      id: generateId(),
       roles: userData.roles ?? [UserRoles.USER],
     });
   }

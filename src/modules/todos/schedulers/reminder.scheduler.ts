@@ -20,9 +20,7 @@ export class ReminderScheduler implements OnModuleInit {
   async checkReminders() {
     const reminders = await this.reminderRepo.findDueReminders();
 
-    if (reminders.length === 0) {
-      return;
-    }
+    if (!reminders || reminders.length === 0) return;
 
     await Promise.all(
       reminders.map((reminder) =>

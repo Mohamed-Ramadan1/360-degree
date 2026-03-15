@@ -9,6 +9,7 @@ import { ResourceCleanupService } from './services/resource-cleanup.service';
 import { OtpService } from './services/otp.service';
 import { SmsSenderService } from './services/sms-sender.service';
 import { PaginationService } from './pagination/paginate.service';
+import { TimezoneService } from './services/timezone.service';
 
 @Global()
 @Module({
@@ -22,6 +23,7 @@ import { PaginationService } from './pagination/paginate.service';
     OtpService,
     SmsSenderService,
     PaginationService,
+    TimezoneService,
   ],
   exports: [
     EmailSenderService,
@@ -32,6 +34,7 @@ import { PaginationService } from './pagination/paginate.service';
     OtpService,
     SmsSenderService,
     PaginationService,
+    TimezoneService,
   ],
 })
 export class CommonModule {}

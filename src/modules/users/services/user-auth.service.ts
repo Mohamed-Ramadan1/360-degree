@@ -13,8 +13,9 @@ export class UserAuthService implements IUserAuthService {
 
   async registerUser(userData: {
     email: string;
-    password: string;
     name: string;
+    password: string;
+    timezone: string;
   }): Promise<IUser> {
     try {
       const user = await this.userAuthRepository.createUser(userData);

@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationService } from 'src/common/pagination/paginate.service';
 import { GetCategoriesDto, UpdateCategoryDto } from '../dto';
 import { ICategoryRepository } from '../interfaces';
-import { v7 as uuidv7 } from 'uuid';
+import { generateId } from 'src/utils';
 @Injectable()
 export class CategoryRepository implements ICategoryRepository {
   constructor(
@@ -24,7 +24,7 @@ export class CategoryRepository implements ICategoryRepository {
   ): Promise<Category> {
     const category = this.categoryRepository.create({
       ...createCategoryDto,
-      id: uuidv7(),
+      id: generateId(),
       ownerId: userId,
     });
     return await this.categoryRepository.save(category);

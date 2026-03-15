@@ -38,6 +38,7 @@ export class AuthService implements IAuthService {
         email: userData.email,
         name: userData.name,
         password: hashedPassword,
+        timezone: userData.timezone,
       });
 
       const tokenKey = `verification-token-${user.id}`;

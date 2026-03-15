@@ -6,7 +6,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 
 // Application modules imports
-import { AuthModule, TodosModule, UsersModule } from './modules';
+import { AuthModule, TodosModule, UsersModule, HabitsModule } from './modules';
 
 import { ConfigModule } from '@nestjs/config';
 import { appConfig, jwtConfig } from './config';
@@ -25,6 +25,7 @@ import { dataSourceOptions } from '../data-source';
       { path: 'auth', module: AuthModule },
       { path: 'users', module: UsersModule },
       { path: 'todos', module: TodosModule },
+      { path: 'habits', module: HabitsModule },
     ]),
     ConfigModule.forRoot({
       isGlobal: true,
@@ -34,6 +35,7 @@ import { dataSourceOptions } from '../data-source';
     AuthModule,
     UsersModule,
     TodosModule,
+    HabitsModule,
     LogsModule,
     RedisModule,
     CommonModule,

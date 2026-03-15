@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsString, Length, Matches } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsTimeZone,
+  Length,
+  Matches,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 export class CreateUserDto {
@@ -38,4 +44,14 @@ export class CreateUserDto {
     required: true,
   })
   password;
+
+  @IsNotEmpty()
+  @IsString()
+  @IsTimeZone()
+  @ApiProperty({
+    description: 'The timezone of the user (e.g., "America/New_York")',
+    example: 'America/New_York',
+    required: true,
+  })
+  timezone;
 }

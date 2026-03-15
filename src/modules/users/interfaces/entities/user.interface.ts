@@ -23,6 +23,7 @@ export interface IUser {
   termsVersion: string | null;
   profileImage: string;
   profileImageKey: string | null;
+  timezone: string;
   createdAt: Date;
   updatedAt: Date;
 }

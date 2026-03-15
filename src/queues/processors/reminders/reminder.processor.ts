@@ -27,7 +27,9 @@ export class ReminderProcessor extends WorkerHost implements OnModuleDestroy {
   }
 
   async process(job: Job<any, any, string>): Promise<void> {
-    this.logger.log(`Processing email job ${job.id} of type ${job.data.type}`);
+    this.logger.log(
+      `Processing reminder job ${job.id} of type ${job.data.type}`,
+    );
     try {
       await this.emailQueueService.addEmailJob({
         type: 'reminder-email',
@@ -54,14 +56,14 @@ export class ReminderProcessor extends WorkerHost implements OnModuleDestroy {
   @OnWorkerEvent('completed')
   onCompleted(job: Job<BaseReminderJob>) {
     this.logger.log(
-      `Email job ${job.id} (${job.data.type}) completed successfully`,
+      `Reminder job ${job.id} (${job.data.type}) completed successfully`,
     );
   }
 
   @OnWorkerEvent('failed')
   onFailed(job: Job<BaseReminderJob>, error: Error) {
     this.logger.error(
-      `Email job ${job.id} (${job.data.type}) failed:`,
+      `Reminder job ${job.id} (${job.data.type}) failed:`,
       error.message,
     );
   }
@@ -69,12 +71,12 @@ export class ReminderProcessor extends WorkerHost implements OnModuleDestroy {
   @OnWorkerEvent('stalled')
   onStalled(job: Job<BaseReminderJob>) {
     this.logger.warn(
-      `Email job ${job.id} (${job.data.type}) stalled - retrying...`,
+      `Reminder job ${job.id} (${job.data.type}) stalled - retrying...`,
     );
   }
 
   @OnWorkerEvent('progress')
   onProgress(job: Job<BaseReminderJob>, progress: number) {
-    this.logger.debug(`Email job ${job.id} progress: ${progress}%`);
+    this.logger.debug(`Reminder job ${job.id} progress: ${progress}%`);
   }
 }

@@ -6,9 +6,9 @@ import {
 import { ReminderCreateDto, ReminderUpdateDto } from '../dto';
 import { ReminderRepository } from '../repos/reminder.repo';
 import { TodoRepository } from '../repos';
-import { v7 as uuidv7 } from 'uuid';
 import { LoggerService } from 'src/logs/logger.service';
 import { Reminder } from '../entities/reminder.entity';
+import { generateId } from 'src/utils';
 @Injectable()
 export class ReminderService {
   constructor(
@@ -37,7 +37,7 @@ export class ReminderService {
       this.validateReminderAt(reminderAt, todo.reminders);
 
       return await this.reminderRepository.create({
-        id: uuidv7(),
+        id: generateId(),
         todoId,
         reminderAt: reminderDto.reminderAt,
       });

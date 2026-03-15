@@ -5,8 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ITodoRepository } from '../interfaces';
 import { PaginationService } from 'src/common/pagination/paginate.service';
 import { PaginatedResponseDto } from 'src/common/pagination/dto';
-import { v7 as uuidv7 } from 'uuid';
 import { GetTodosDto } from '../dto';
+import { generateId } from 'src/utils';
 
 @Injectable()
 export class TodoRepository implements ITodoRepository {
@@ -23,7 +23,7 @@ export class TodoRepository implements ITodoRepository {
   async createTodo(userId: string, todoData: Partial<Todo>): Promise<Todo> {
     const todo = this.todoRepository.create({
       ...todoData,
-      id: uuidv7(),
+      id: generateId(),
       ownerId: userId,
     });
     return this.todoRepository.save(todo);

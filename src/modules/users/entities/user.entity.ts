@@ -84,6 +84,9 @@ export class User implements IUser {
   @Column({ type: 'varchar', length: 255, nullable: true })
   profileImageKey: string | null;
 
+  @Column({ type: 'varchar', length: 100, nullable: false })
+  timezone: string;
+
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
