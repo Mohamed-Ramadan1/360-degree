@@ -11,10 +11,11 @@ import {
 import { User } from 'src/modules/users/entities/user.entity';
 
 import { RecurrenceType } from 'src/common/consts/habit-recurrence';
+import { IHabit } from '../interfaces';
 
 @Entity('habits')
-@Index(['isActive', 'timeUTC'])
-export class Habit {
+@Index(['nextTriggerAt', 'isActive'])
+export class Habit implements IHabit {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -30,10 +31,6 @@ export class Habit {
   @Column({ type: 'varchar', length: 5, nullable: false })
   time: string;
 
-  @Index()
-  @Column({ type: 'varchar', length: 5, nullable: false })
-  timeUTC: string;
-
   @Column({ type: 'int', array: true, nullable: true })
   days: number[] | null;
 
@@ -43,11 +40,12 @@ export class Habit {
   @Column({ type: 'timestamptz', nullable: true })
   endDate: Date | null;
 
+  @Index()
+  @Column({ type: 'timestamptz', nullable: true })
+  nextTriggerAt: Date | null;
+
   @Column({ type: 'boolean', default: true, nullable: false })
   isActive: boolean;
-
-  @Column({ type: 'timestamptz', nullable: true })
-  lastSentAt: Date | null;
 
   @Index()
   @Column({ type: 'uuid', nullable: false })

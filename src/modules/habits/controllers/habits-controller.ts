@@ -17,4 +17,6 @@ export class HabitsController {
       habit,
     };
   }
+
+  // TODO: Add endpoints for updating, deleting, and fetching habits
 }

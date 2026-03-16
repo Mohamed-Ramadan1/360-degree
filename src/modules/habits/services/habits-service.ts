@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { HabitRepository } from '../repos/habit.repository';
 import { LoggerService } from 'src/logs/logger.service';
 import { HabitCreateDto } from '../dto';
@@ -14,15 +14,26 @@ export class HabitsService {
   ) {}
   async createHabit(createHabitDto: HabitCreateDto, user: IUser) {
     try {
-      const { timeUTC, daysUTC, endDate } = this.prepareHabitDates(
-        createHabitDto,
+      const endDate = this.convertEndDate(
+        createHabitDto.endDate,
         user.timezone,
       );
 
+      const nextTriggerAt = this.timezoneService.calculateFirstTrigger(
+        {
+          recurrenceType: createHabitDto.recurrenceType,
+          time: createHabitDto.time,
+          days: createHabitDto.days,
+          dayOfMonth: createHabitDto.dayOfMonth,
+        },
+        user.timezone,
+      );
+
+      this.validateEndDate(endDate, nextTriggerAt);
+
       return await this.habitRepository.createHabit(
         createHabitDto,
-        timeUTC,
-        daysUTC,
+        nextTriggerAt,
         endDate,
         user.id,
       );
@@ -32,15 +43,25 @@ export class HabitsService {
     }
   }
 
-  private prepareHabitDates(dto: HabitCreateDto, timezone: string) {
-    return {
-      timeUTC: this.timezoneService.convertToUTC(dto.time, timezone),
-      daysUTC: dto.days
-        ? this.timezoneService.convertDaysToUTC(dto.days, dto.time, timezone)
-        : null,
-      endDate: dto.endDate
-        ? this.timezoneService.convertEndDateToUTC(dto.endDate, timezone)
-        : null,
-    };
+  private validateEndDate(endDate: Date | null, nextTriggerAt: Date) {
+    if (!endDate) return;
+
+    if (endDate < new Date()) {
+      throw new BadRequestException('End date must be in the future');
+    }
+
+    if (nextTriggerAt > endDate) {
+      throw new BadRequestException(
+        'End date must be after the first scheduled trigger',
+      );
+    }
+  }
+
+  private convertEndDate(
+    endDate: string | undefined,
+    timezone: string,
+  ): Date | null {
+    if (!endDate) return null;
+    return this.timezoneService.convertEndDateToUTC(endDate, timezone);
   }
 }

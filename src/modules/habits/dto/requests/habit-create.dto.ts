@@ -12,10 +12,9 @@ import {
   ArrayMinSize,
   ArrayMaxSize,
   ValidateIf,
-  Validate,
 } from 'class-validator';
 import { RecurrenceType } from 'src/common/consts';
-import { IsFutureDate } from 'src/common/validators';
+import { IsValidHabitRecurrence } from 'src/common/validators';
 
 export class HabitCreateDto {
   @IsString()
@@ -29,6 +28,8 @@ export class HabitCreateDto {
   description?: string;
 
   @IsEnum(RecurrenceType)
+  @IsValidHabitRecurrence()
+  @IsNotEmpty()
   recurrenceType: RecurrenceType;
 
   @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
@@ -54,7 +55,6 @@ export class HabitCreateDto {
   dayOfMonth?: number;
 
   @IsOptional()
-  @Validate(IsFutureDate)
   @Matches(/^\d{4}-\d{2}-\d{2}$/, {
     message: 'endDate must be in YYYY-MM-DD format',
   })

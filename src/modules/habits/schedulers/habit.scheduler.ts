@@ -19,8 +19,8 @@ export class HabitScheduler implements OnModuleInit {
   @Cron(CronExpression.EVERY_MINUTE)
   async checkReminders() {
     const habits = await this.habitRepo.findDueHabits();
+    console.log('Found due habits: corn', habits);
     if (!habits || habits.length === 0) return;
-
     await Promise.all(
       habits.map((habit) =>
         this.habitQueueService.addHabitJob({
@@ -29,7 +29,12 @@ export class HabitScheduler implements OnModuleInit {
           userEmail: habit.owner.email,
           userName: habit.owner.name,
           habitTitle: habit.title,
-          habitAt: habit.time,
+          recurrenceType: habit.recurrenceType,
+          time: habit.time,
+          days: habit.days,
+          dayOfMonth: habit.dayOfMonth,
+          endDate: habit.endDate,
+          timezone: habit.owner.timezone,
         }),
       ),
     );
