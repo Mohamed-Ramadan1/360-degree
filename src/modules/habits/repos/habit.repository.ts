@@ -1,17 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Habit } from '../entities/habit.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { HabitCreateDto } from '../dto';
-import { TimezoneService } from 'src/common/services/timezone.service';
+import { GetHabitsDto, HabitCreateDto } from '../dto';
 import { generateId } from 'src/utils';
+import { PaginationService } from 'src/common/pagination/paginate.service';
 
 @Injectable()
 export class HabitRepository {
   constructor(
     @InjectRepository(Habit)
     private readonly habitRepository: Repository<Habit>,
-    private readonly timezoneService: TimezoneService,
+    private readonly paginationService: PaginationService,
   ) {}
   async createHabit(
     createHabitDto: HabitCreateDto,
@@ -30,8 +30,7 @@ export class HabitRepository {
 
   async findDueHabits(): Promise<Habit[] | null> {
     const now = new Date();
-    // const now = new Date('2026-04-01T04:35:00.000Z');
-    console.log(now);
+
     return this.habitRepository
       .createQueryBuilder('habit')
       .leftJoin('habit.owner', 'owner')
@@ -55,5 +54,39 @@ export class HabitRepository {
 
   async update(id: string, updateData: Partial<Habit>): Promise<void> {
     await this.habitRepository.update(id, updateData);
+  }
+
+  async findById(id: string, ownerId: string): Promise<Habit | null> {
+    const habit = await this.habitRepository.findOne({
+      where: { id, ownerId },
+    });
+    return habit;
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.habitRepository.delete({ id });
+  }
+
+  async findHabits(ownerId: string, getHabitsDto: GetHabitsDto) {
+    const queryBuilder = this.habitRepository
+      .createQueryBuilder('habit')
+      .where('habit.ownerId = :ownerId', { ownerId })
+      .select([
+        'habit.id',
+        'habit.title',
+        'habit.recurrenceType',
+        'habit.time',
+        'habit.days',
+        'habit.dayOfMonth',
+        'habit.endDate',
+      ]);
+
+    return this.paginationService.paginate(queryBuilder, getHabitsDto, {
+      alias: 'habit',
+      filters: {
+        title: { value: getHabitsDto.title, operator: 'like' },
+        recurrenceType: { value: getHabitsDto.recurrenceType },
+      },
+    });
   }
 }
