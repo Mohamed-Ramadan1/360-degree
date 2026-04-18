@@ -19,6 +19,7 @@ export class ReminderService {
     private readonly timezoneService: TimezoneService,
     private readonly logger: LoggerService,
   ) {}
+  private readonly MAX_REMINDERS = 5;
 
   async createReminder(
     todoId: string,
@@ -32,17 +33,19 @@ export class ReminderService {
       );
       if (!todo) throw new NotFoundException('Todo not found');
 
-      if (todo.reminders.length >= 5) {
-        throw new BadRequestException('Maximum 5 reminders per todo');
+      if (todo.reminders.length >= this.MAX_REMINDERS) {
+        throw new BadRequestException(
+          `Maximum ${this.MAX_REMINDERS} reminders per todo`,
+        );
       }
 
-      const reminderAtUTC = this.timezoneService.calculateReminderTriggerAt(
+      const reminderAtUTC = this.getValidReminderTime(
         reminderDto.reminderAt,
         user.timezone,
       );
       this.validateReminderAt(reminderAtUTC, todo.reminders);
 
-      return await this.reminderRepository.create({
+      return this.reminderRepository.create({
         id: generateId(),
         todoId,
         reminderAt: reminderAtUTC,
@@ -77,7 +80,7 @@ export class ReminderService {
       );
       if (!todo) throw new NotFoundException('Todo not found');
 
-      const reminderAtUTC = this.timezoneService.calculateReminderTriggerAt(
+      const reminderAtUTC = this.getValidReminderTime(
         reminderDto.reminderAt,
         user.timezone,
       );
@@ -105,6 +108,25 @@ export class ReminderService {
       this.logger.error('Failed to delete reminder', error);
       throw error;
     }
+  }
+
+  private getValidReminderTime(reminderAt: Date, timezone: string) {
+    const reminderAtDate = new Date(reminderAt);
+    const reminderAtUTC = this.timezoneService.calculateReminderTriggerAt(
+      reminderAtDate,
+      timezone,
+    );
+
+    const isOld = this.timezoneService.checkIfTimeOldForTimezone(
+      reminderAtUTC,
+      timezone,
+    );
+
+    if (isOld) {
+      throw new BadRequestException('Reminder date is in the past');
+    }
+
+    return reminderAtUTC;
   }
 
   private validateReminderAt(reminderAt: Date, existingReminders: Reminder[]) {

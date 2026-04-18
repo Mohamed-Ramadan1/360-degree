@@ -8,6 +8,6 @@ export class ReminderUpdateDto {
     description: 'Updated reminder date in ISO format',
   })
   @IsISO8601({ strict: true })
-  @Validate(IsFutureDate)
+  // @Validate(IsFutureDate)
   reminderAt!: Date;
 }

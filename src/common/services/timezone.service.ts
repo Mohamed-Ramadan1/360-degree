@@ -65,6 +65,18 @@ export class TimezoneService {
     }
   }
 
+  checkIfTimeOldForTimezone(date: Date, timezone: string): boolean {
+    try {
+      const reminderAtUTC = new Date(date);
+      const nowInTimezone = DateTime.now().setZone(timezone);
+
+      return nowInTimezone.toJSDate() > reminderAtUTC;
+    } catch (error) {
+      this.logger.error('Error checking if time is old for timezone', error);
+      throw error;
+    }
+  }
+
   // ✅ shared logic - used by both calculateFirstTrigger and calculateNextTriggerAt
   private computeNextDate(
     dto: {
