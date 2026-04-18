@@ -9,5 +9,5 @@ export class ReminderUpdateDto {
   })
   @IsISO8601({ strict: true })
   @Validate(IsFutureDate)
-  reminderAt: Date;
+  reminderAt!: Date;
 }

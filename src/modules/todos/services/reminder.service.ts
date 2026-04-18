@@ -9,23 +9,26 @@ import { TodoRepository } from '../repos';
 import { LoggerService } from 'src/logs/logger.service';
 import { Reminder } from '../entities/reminder.entity';
 import { generateId } from 'src/utils';
+import { TimezoneService } from 'src/common/services/timezone.service';
+import { IUser } from 'src/modules/users/interfaces/entities/user.interface';
 @Injectable()
 export class ReminderService {
   constructor(
     private readonly reminderRepository: ReminderRepository,
     private readonly todoRepository: TodoRepository,
+    private readonly timezoneService: TimezoneService,
     private readonly logger: LoggerService,
   ) {}
 
   async createReminder(
     todoId: string,
     reminderDto: ReminderCreateDto,
-    userId: string,
+    user: IUser,
   ) {
     try {
       const todo = await this.todoRepository.findTodoWithReminders(
         todoId,
-        userId,
+        user.id,
       );
       if (!todo) throw new NotFoundException('Todo not found');
 
@@ -33,13 +36,16 @@ export class ReminderService {
         throw new BadRequestException('Maximum 5 reminders per todo');
       }
 
-      const reminderAt = new Date(reminderDto.reminderAt);
-      this.validateReminderAt(reminderAt, todo.reminders);
+      const reminderAtUTC = this.timezoneService.calculateReminderTriggerAt(
+        reminderDto.reminderAt,
+        user.timezone,
+      );
+      this.validateReminderAt(reminderAtUTC, todo.reminders);
 
       return await this.reminderRepository.create({
         id: generateId(),
         todoId,
-        reminderAt: reminderDto.reminderAt,
+        reminderAt: reminderAtUTC,
       });
     } catch (error) {
       this.logger.error('Failed to create reminder', error);
@@ -62,22 +68,26 @@ export class ReminderService {
     todoId: string,
     reminderId: string,
     reminderDto: ReminderUpdateDto,
-    userId: string,
+    user: IUser,
   ) {
     try {
       const todo = await this.todoRepository.findTodoWithReminders(
         todoId,
-        userId,
+        user.id,
       );
       if (!todo) throw new NotFoundException('Todo not found');
 
-      const reminderAt = new Date(reminderDto.reminderAt);
+      const reminderAtUTC = this.timezoneService.calculateReminderTriggerAt(
+        reminderDto.reminderAt,
+        user.timezone,
+      );
+
       this.validateReminderAt(
-        reminderAt,
+        reminderAtUTC,
         todo.reminders.filter((r) => r.id !== reminderId),
       );
       await this.reminderRepository.update(reminderId, {
-        reminderAt,
+        reminderAt: reminderAtUTC,
         isSent: false,
       });
     } catch (error) {

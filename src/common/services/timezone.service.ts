@@ -51,6 +51,20 @@ export class TimezoneService {
     }
   }
 
+  calculateReminderTriggerAt(reminderAt: Date, timezone: string): Date {
+    try {
+      const reminderAtUTC = new Date(reminderAt);
+
+      const triggerAt = DateTime.fromJSDate(reminderAtUTC, { zone: timezone })
+        .toUTC()
+        .toJSDate();
+      return triggerAt;
+    } catch (error) {
+      this.logger.error('Error calculating reminder trigger time', error);
+      throw error;
+    }
+  }
+
   // ✅ shared logic - used by both calculateFirstTrigger and calculateNextTriggerAt
   private computeNextDate(
     dto: {

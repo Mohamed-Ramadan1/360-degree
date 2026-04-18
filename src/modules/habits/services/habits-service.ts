@@ -55,10 +55,7 @@ export class HabitsService {
     user: IUser,
   ) {
     try {
-      const habit = await this.habitRepository.findById(habitId, user.id);
-      if (!habit)
-        throw new BadRequestException('No habit matching the provided id');
-
+      const habit = await this.getHabitOrThrow(habitId, user.id);
       if (!habit.isActive) {
         throw new BadRequestException('Cannot update an inactive habit');
       }
@@ -76,9 +73,7 @@ export class HabitsService {
     user: IUser,
   ) {
     try {
-      const habit = await this.habitRepository.findById(habitId, user.id);
-      if (!habit)
-        throw new BadRequestException('No habit matching the provided id');
+      const habit = await this.getHabitOrThrow(habitId, user.id);
 
       if (!habit.isActive) {
         throw new BadRequestException('Cannot update an inactive habit');
@@ -117,11 +112,8 @@ export class HabitsService {
 
   async deleteHabit(habitId: string, user: IUser) {
     try {
-      const habit = await this.habitRepository.findById(habitId, user.id);
-      if (!habit)
-        throw new BadRequestException('No habit matching the provided id');
-
-      await this.habitRepository.delete(habitId);
+      const habit = await this.getHabitOrThrow(habitId, user.id);
+      await this.habitRepository.delete(habit.id);
     } catch (error) {
       this.logger.error('Error deleting habit', error);
       throw error;
@@ -130,10 +122,7 @@ export class HabitsService {
 
   async getHabitById(habitId: string, user: IUser) {
     try {
-      const habit = await this.habitRepository.findById(habitId, user.id);
-      if (!habit)
-        throw new BadRequestException('No habit matching the provided id');
-
+      const habit = await this.getHabitOrThrow(habitId, user.id);
       return habit;
     } catch (error) {
       this.logger.error('Error fetching habit by id', error);
@@ -152,6 +141,16 @@ export class HabitsService {
       this.logger.error('Error fetching habits', error);
       throw error;
     }
+  }
+
+  private async getHabitOrThrow(habitId: string, userId: string) {
+    const habit = await this.habitRepository.findById(habitId, userId);
+
+    if (!habit) {
+      throw new BadRequestException('No habit matching the provided id');
+    }
+
+    return habit;
   }
 
   private validateEndDate(endDate: Date | null, nextTriggerAt: Date) {

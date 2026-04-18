@@ -84,7 +84,7 @@ export class RemindersController {
     const reminder = await this.reminderService.createReminder(
       todoId,
       reminderDto,
-      req.user.id,
+      req.user,
     );
 
     return {
@@ -193,7 +193,7 @@ export class RemindersController {
       todoId,
       reminderId,
       reminderDto,
-      req.user.id,
+      req.user,
     );
     return { message: 'Reminder updated successfully' };
   }
