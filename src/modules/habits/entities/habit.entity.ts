@@ -55,6 +55,18 @@ export class Habit implements IHabit {
   @JoinColumn({ name: 'ownerId' })
   owner: User;
 
+  @Column({ type: 'int', default: 0 })
+  currentStreak: number;
+
+  @Column({ type: 'int', default: 0 })
+  longestStreak: number;
+
+  @Column({ type: 'int', default: 0 })
+  completionCount: number; // for each type of habits
+
+  @Column({ type: 'timestamptz', nullable: true })
+  lastCompletedAt: Date | null;
+
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 

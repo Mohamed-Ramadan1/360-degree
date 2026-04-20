@@ -77,6 +77,10 @@ export class TimezoneService {
     }
   }
 
+  userNowInTimezone(timezone: string): DateTime {
+    return DateTime.now().setZone(timezone);
+  }
+
   // ✅ shared logic - used by both calculateFirstTrigger and calculateNextTriggerAt
   private computeNextDate(
     dto: {

@@ -1,5 +1,5 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { EntityManager, Repository } from 'typeorm';
 import { Habit } from '../entities/habit.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { GetHabitsDto, HabitCreateDto } from '../dto';
@@ -56,11 +56,34 @@ export class HabitRepository {
     await this.habitRepository.update(id, updateData);
   }
 
+  async updateWithManager(
+    id: string,
+    updateData: Partial<Habit>,
+    manager: EntityManager,
+  ): Promise<void> {
+    await manager.getRepository(Habit).update(id, updateData);
+  }
+
   async findById(id: string, ownerId: string): Promise<Habit | null> {
     const habit = await this.habitRepository.findOne({
       where: { id, ownerId },
     });
+
     return habit;
+  }
+
+  async findByIdForUpdate(
+    id: string,
+    ownerId: string,
+    manager: EntityManager,
+  ): Promise<Habit | null> {
+    return manager
+      .getRepository(Habit)
+      .createQueryBuilder('habit')
+      .where('habit.id = :habitId', { habitId: id })
+      .andWhere('habit.ownerId = :ownerId', { ownerId })
+      .setLock('pessimistic_write')
+      .getOne();
   }
 
   async delete(id: string): Promise<void> {
@@ -79,6 +102,9 @@ export class HabitRepository {
         'habit.days',
         'habit.dayOfMonth',
         'habit.endDate',
+        'habit.completionCount',
+        'habit.longestStreak',
+        'habit.currentStreak',
       ]);
 
     return this.paginationService.paginate(queryBuilder, getHabitsDto, {

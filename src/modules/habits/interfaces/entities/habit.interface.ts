@@ -23,6 +23,14 @@ export interface IHabit {
 
   ownerId: string;
 
+  currentStreak: number;
+
+  longestStreak: number;
+
+  completionCount: number;
+
+  lastCompletedAt: Date | null;
+
   createdAt: Date;
 
   updatedAt: Date;
