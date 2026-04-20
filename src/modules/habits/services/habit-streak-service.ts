@@ -27,7 +27,8 @@ export class HabitStreakService {
         manager,
       );
 
-      if (!habit) throw new BadRequestException('Habit not found');
+      if (!habit)
+        throw new BadRequestException('Invalid habit ID or habit not found');
 
       // Enforce recurrence rules so each habit can be completed only once
       // in its valid completion window.
@@ -70,7 +71,8 @@ export class HabitStreakService {
 
   async getHabitStreaks(habitId: string, user: IUser) {
     const habit = await this.habitRepository.findById(habitId, user.id);
-    if (!habit) throw new BadRequestException('Habit not found');
+    if (!habit)
+      throw new BadRequestException('Invalid habit ID or habit not found');
 
     if (habit.recurrenceType !== RecurrenceType.DAILY)
       throw new BadRequestException(

@@ -5,3 +5,5 @@ export { GetHabitsDto } from './requests/get-habits.dto';
 export { HabitCreateResponse } from './response/habit-create-response';
 export { getHabitResponse } from './response/get-habit-response';
 export { GetHabitsResponse } from './response/get-habits-response';
+export { GetHabitsStreaksResponse } from './response/get-habits-streaks-response';
+export { CompleteHabitResponse } from './response/complete-habit-response';
