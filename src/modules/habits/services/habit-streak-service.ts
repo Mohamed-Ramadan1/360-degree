@@ -68,6 +68,25 @@ export class HabitStreakService {
     });
   }
 
+  async getHabitStreaks(habitId: string, user: IUser) {
+    const habit = await this.habitRepository.findById(habitId, user.id);
+    if (!habit) throw new BadRequestException('Habit not found');
+
+    if (habit.recurrenceType !== RecurrenceType.DAILY)
+      throw new BadRequestException(
+        'Streaks are only available for daily habits',
+      );
+
+    const result = await this.habitStreakRepository.findByHabitId(habitId);
+
+    return {
+      currentStreak: habit.currentStreak,
+      longestStreak: habit.longestStreak,
+      totalStreaks: habit.completionCount,
+      ...result,
+    };
+  }
+
   private validateCompletion(
     habit: IHabit,
     userNow: DateTime,
