@@ -7,9 +7,14 @@ import { IHabit } from '../interfaces';
 import { DataSource, EntityManager } from 'typeorm';
 import { HabitRepository } from '../repos/habit.repository';
 import { HabitStreakRepository } from '../repos/habit-streak.repository';
+import {
+  HabitCompletionResult,
+  HabitStreaksResult,
+  IHabitStreakService,
+} from '../interfaces';
 
 @Injectable()
-export class HabitStreakService {
+export class HabitStreakService implements IHabitStreakService {
   constructor(
     private readonly timezoneService: TimezoneService,
     private readonly dataSource: DataSource,
@@ -17,7 +22,10 @@ export class HabitStreakService {
     private readonly habitStreakRepository: HabitStreakRepository,
   ) {}
 
-  async completeHabit(habitId: string, user: IUser) {
+  async completeHabit(
+    habitId: string,
+    user: IUser,
+  ): Promise<HabitCompletionResult> {
     const userNow = this.timezoneService.userNowInTimezone(user.timezone);
 
     return this.dataSource.transaction(async (manager) => {
@@ -69,7 +77,10 @@ export class HabitStreakService {
     });
   }
 
-  async getHabitStreaks(habitId: string, user: IUser) {
+  async getHabitStreaks(
+    habitId: string,
+    user: IUser,
+  ): Promise<HabitStreaksResult> {
     const habit = await this.habitRepository.findById(habitId, user.id);
     if (!habit)
       throw new BadRequestException('Invalid habit ID or habit not found');

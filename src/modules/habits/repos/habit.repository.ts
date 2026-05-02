@@ -5,9 +5,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { GetHabitsDto, HabitCreateDto } from '../dto';
 import { generateId } from 'src/utils';
 import { PaginationService } from 'src/common/pagination/paginate.service';
+import { IHabitRepository } from '../interfaces';
 
 @Injectable()
-export class HabitRepository {
+export class HabitRepository implements IHabitRepository {
   constructor(
     @InjectRepository(Habit)
     private readonly habitRepository: Repository<Habit>,

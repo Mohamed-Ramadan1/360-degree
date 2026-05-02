@@ -4,9 +4,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { HabitStreak } from '../entities/habit-streak.entity';
 import { generateId } from 'src/utils';
 import { PaginationService } from 'src/common/pagination/paginate.service';
+import { IHabitStreakRepository } from '../interfaces';
 
 @Injectable()
-export class HabitStreakRepository {
+export class HabitStreakRepository implements IHabitStreakRepository {
   constructor(
     @InjectRepository(HabitStreak)
     private readonly habitStreakRepository: Repository<HabitStreak>,

@@ -10,9 +10,10 @@ import {
 import { IUser } from 'src/modules/users/interfaces';
 import { TimezoneService } from 'src/common/services/timezone.service';
 import { RecurrenceType } from 'src/common/consts/habit-recurrence';
+import { IHabitsService } from '../interfaces';
 
 @Injectable()
-export class HabitsService {
+export class HabitsService implements IHabitsService {
   constructor(
     private readonly habitRepository: HabitRepository,
     private readonly timezoneService: TimezoneService,
