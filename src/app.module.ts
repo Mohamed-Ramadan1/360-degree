@@ -6,7 +6,13 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 
 // Application modules imports
-import { AuthModule, TodosModule, UsersModule, HabitsModule } from './modules';
+import {
+  AuthModule,
+  TodosModule,
+  UsersModule,
+  HabitsModule,
+  NotificationsModule,
+} from './modules';
 
 import { ConfigModule } from '@nestjs/config';
 import { appConfig, jwtConfig } from './config';
@@ -18,6 +24,7 @@ import { APP_FILTER, APP_GUARD, RouterModule } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { AuthGuard } from './common/guards';
 import { dataSourceOptions } from '../data-source';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -26,16 +33,19 @@ import { dataSourceOptions } from '../data-source';
       { path: 'users', module: UsersModule },
       { path: 'todos', module: TodosModule },
       { path: 'habits', module: HabitsModule },
+      { path: 'notifications', module: NotificationsModule },
     ]),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig, jwtConfig],
       envFilePath: ['.env.local', '.env'],
     }),
+    EventEmitterModule.forRoot(),
     AuthModule,
     UsersModule,
     TodosModule,
     HabitsModule,
+    NotificationsModule,
     LogsModule,
     RedisModule,
     CommonModule,
