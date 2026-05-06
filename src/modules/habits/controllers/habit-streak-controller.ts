@@ -14,6 +14,7 @@ import { Throttle } from '@nestjs/throttler';
 import { TransformResponseInterceptor } from 'src/common/interceptors/transform-response.interceptor';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -23,6 +24,7 @@ import {
 
 @Throttle({ default: { limit: 25, ttl: 600000 } })
 @UseInterceptors(TransformResponseInterceptor)
+@ApiBearerAuth('JWT-auth')
 @ApiTags('Habit Streaks')
 @Controller(':id')
 export class HabitStreakController {

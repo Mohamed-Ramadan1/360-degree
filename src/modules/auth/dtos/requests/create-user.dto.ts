@@ -16,7 +16,7 @@ export class CreateUserDto {
     example: 'John Doe',
     required: true,
   })
-  name;
+  name!: string;
 
   @IsString()
   @IsNotEmpty()
@@ -26,7 +26,7 @@ export class CreateUserDto {
     example: 'user@example.com',
     required: true,
   })
-  email;
+  email!: string;
 
   @IsString()
   @IsNotEmpty()
@@ -43,7 +43,7 @@ export class CreateUserDto {
     example: 'strongPassword@123',
     required: true,
   })
-  password;
+  password!: string;
 
   @IsNotEmpty()
   @IsString()
@@ -53,5 +53,5 @@ export class CreateUserDto {
     example: 'America/New_York',
     required: true,
   })
-  timezone;
+  timezone!: string;
 }

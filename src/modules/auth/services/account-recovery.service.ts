@@ -13,6 +13,9 @@ import { TokensTrackingService } from 'src/common/services/tokens-tracking-servi
 import { generatePasswordUpdatedEmail } from '../emails/templates/passwordChangeConfirmationEmail';
 import { generateCongratulationsEmail } from '../emails/templates/generateCongratulationsEmail';
 import { IAccountRecoveryService } from '../interfaces/services/accountRecoveryService.interface';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NotificationEvents } from 'src/modules/notifications/events/names/notification-events.constants';
+import { NotificationSourceType } from 'src/common/consts';
 
 @Injectable()
 export class AccountRecoveryService implements IAccountRecoveryService {
@@ -23,6 +26,7 @@ export class AccountRecoveryService implements IAccountRecoveryService {
     private readonly passwordHelperService: PasswordHelperService,
     private readonly tokensTrackingService: TokensTrackingService,
     private readonly logger: LoggerService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async sendPasswordResetEmail(email: string) {
@@ -52,6 +56,14 @@ export class AccountRecoveryService implements IAccountRecoveryService {
         subject: 'Password Reset Request',
         text: `You requested a password reset. Use the following token: ${token}. This token expires at ${15} minutes.`,
         html: resetPasswordEmail,
+      });
+
+      this.eventEmitter.emit(NotificationEvents.Created, {
+        userId: existingUser.id,
+        title: 'Password Reset Requested',
+        body: "You requested a password reset. If this wasn't you, please secure your account immediately.",
+        sourceType: NotificationSourceType.SECURITY,
+        sourceId: existingUser.id,
       });
     } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error(String(err));
@@ -92,6 +104,14 @@ export class AccountRecoveryService implements IAccountRecoveryService {
           userName: user.name,
         }),
       });
+
+      this.eventEmitter.emit(NotificationEvents.Created, {
+        userId: user.id,
+        title: 'Password Changed Successfully',
+        body: 'Your password has been changed successfully. If you did not make this change, please contact support.',
+        sourceType: NotificationSourceType.SECURITY,
+        sourceId: user.id,
+      });
     } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error(String(err));
       this.logger.error('Error in resetPassword', error);
@@ -130,6 +150,14 @@ export class AccountRecoveryService implements IAccountRecoveryService {
         html: generateCongratulationsEmail({
           userName: user.name,
         }),
+      });
+
+      this.eventEmitter.emit(NotificationEvents.Created, {
+        userId: user.id,
+        title: 'Email Verified Successfully',
+        body: 'Your email has been verified. Your account is now fully active.',
+        sourceType: NotificationSourceType.AUTH,
+        sourceId: user.id,
       });
     } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error(String(err));

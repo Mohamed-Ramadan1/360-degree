@@ -14,6 +14,9 @@ import { generatePasswordUpdatedEmail } from 'src/modules/auth/emails/templates/
 import { UpdateProfileData } from '../interfaces/services/profileManagementService.interface';
 import { VerificationTokensCreatorService } from 'src/common/services/verification-tokens-creator.service';
 import { generateWelcomeEmail } from 'src/modules/auth/emails/templates/wellcomEmail';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NotificationEvents } from 'src/modules/notifications/events/names/notification-events.constants';
+import { NotificationSourceType } from 'src/common/consts';
 
 @Injectable()
 export class ProfileManagementService {
@@ -25,6 +28,7 @@ export class ProfileManagementService {
     private readonly verificationTokensCreator: VerificationTokensCreatorService,
     private readonly emailQueueService: EmailQueueService,
     private readonly resourceCleanupService: ResourceCleanupQueueService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
   async updatePassword(
     user: IUser,
@@ -56,6 +60,14 @@ export class ProfileManagementService {
           userEmail: user.email,
           userName: user.name,
         }),
+      });
+
+      this.eventEmitter.emit(NotificationEvents.Created, {
+        userId: user.id,
+        title: 'Password Changed',
+        body: "Your password has been changed successfully. If this wasn't you, contact support immediately.",
+        sourceType: NotificationSourceType.SECURITY,
+        sourceId: user.id,
       });
     } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error('Unknown error');

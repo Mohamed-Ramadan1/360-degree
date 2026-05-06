@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { User } from 'src/modules/users/entities/user.entity';
 import { INotification } from '../interfaces';
+import { NotificationSourceType } from 'src/common/consts/notification-source-type';
 
 export enum NotificationChannel {
   IN_APP = 'in_app',
@@ -47,8 +48,8 @@ export class Notification implements INotification {
   })
   channel: NotificationChannel;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  sourceType: string | null;
+  @Column({ type: 'enum', enum: NotificationSourceType, nullable: true })
+  sourceType: NotificationSourceType | null;
 
   @Column({ type: 'uuid', nullable: true })
   sourceId: string | null;

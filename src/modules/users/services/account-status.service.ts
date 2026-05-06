@@ -1,4 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NotificationEvents } from 'src/modules/notifications/events/names/notification-events.constants';
+import { NotificationSourceType } from 'src/common/consts';
 // interfaces imports
 import { IAccountStatusService, IUser } from '../interfaces/index';
 import { LoggerService } from 'src/logs/logger.service';
@@ -18,6 +21,7 @@ export class AccountStatusService implements IAccountStatusService {
     private readonly logger: LoggerService,
     private readonly accountStatusRepository: UserAccountStatusRepository,
     private readonly emailQueueService: EmailQueueService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async activateAccount(user: IUser): Promise<void> {
@@ -42,6 +46,14 @@ export class AccountStatusService implements IAccountStatusService {
           user: user,
           activationDate: new Date(),
         }),
+      });
+
+      this.eventEmitter.emit(NotificationEvents.Created, {
+        userId: user.id,
+        title: 'Account Activated',
+        body: 'Your account has been activated.',
+        sourceType: NotificationSourceType.SYSTEM,
+        sourceId: user.id,
       });
     } catch (error: unknown) {
       const err = error instanceof Error ? error : new Error(String(error));

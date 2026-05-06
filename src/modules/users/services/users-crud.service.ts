@@ -1,4 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NotificationEvents } from 'src/modules/notifications/events/names/notification-events.constants';
+import { NotificationSourceType } from 'src/common/consts';
 
 // logs imports
 import { LoggerService } from 'src/logs/logger.service';
@@ -29,6 +32,7 @@ export class UsersCrudService implements IUserCrudService {
     private readonly passwordHelperService: PasswordHelperService,
     private readonly verificationTokensCreator: VerificationTokensCreatorService,
     private readonly emailQueue: EmailQueueService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async createUser(userData: AdminCreateUserDto): Promise<IUser> {
@@ -64,6 +68,14 @@ export class UsersCrudService implements IUserCrudService {
         subject: 'Welcome to 360-degree!',
         text: 'Welcome to 360-degree!',
         html: emailContent,
+      });
+
+      this.eventEmitter.emit(NotificationEvents.Created, {
+        userId: user.id,
+        title: 'Account Created by Admin',
+        body: 'An account was created for you by an administrator. Please verify your email to get started.',
+        sourceType: NotificationSourceType.SYSTEM,
+        sourceId: user.id,
       });
 
       return user;

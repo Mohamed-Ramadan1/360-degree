@@ -25,6 +25,7 @@ import {
 } from '../dto';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiOkResponse,
   ApiOperation,
@@ -39,6 +40,7 @@ import { OperationSuccessDto } from 'src/modules/auth/dtos';
 
 @Throttle({ default: { limit: 25, ttl: 600000 } })
 @UseInterceptors(TransformResponseInterceptor)
+@ApiBearerAuth('JWT-auth')
 @ApiTags('Habits')
 @Controller()
 export class HabitsController {

@@ -16,6 +16,9 @@ import { EmailQueueService } from 'src/queues/services/email-queue.service';
 import { IUser } from 'src/modules/users/interfaces/entities/user.interface';
 import { ITokenPair } from '../interfaces/tokens/tokenGeneration.interface';
 import { IAuthService } from '../interfaces/services/authService.interface';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NotificationEvents } from 'src/modules/notifications/events/names/notification-events.constants';
+import { NotificationSourceType } from 'src/common/consts';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -27,6 +30,7 @@ export class AuthService implements IAuthService {
     private readonly tokenCreationService: TokenCreationService,
     private readonly tokensTrackingService: TokensTrackingService,
     private readonly emailQueueService: EmailQueueService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async signUp(userData: CreateUserDto) {
@@ -64,6 +68,15 @@ export class AuthService implements IAuthService {
         subject: 'Welcome to 360-degree!',
         text: 'Welcome to 360-degree!',
         html: emailContent,
+      });
+
+      // notification for welcome
+      this.eventEmitter.emit(NotificationEvents.Created, {
+        userId: user.id,
+        title: 'Welcome to 360-degree!',
+        body: 'Thank you for signing up! Please verify your email to get started.',
+        sourceType: NotificationSourceType.AUTH,
+        sourceId: user.id,
       });
 
       return { user, tokenPair };

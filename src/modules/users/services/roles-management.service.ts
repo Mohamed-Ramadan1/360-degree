@@ -1,5 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserRoles } from 'src/common/consts';
+import { NotificationEvents } from 'src/modules/notifications/events/names/notification-events.constants';
+import { NotificationSourceType } from 'src/common/consts';
 import { LoggerService } from 'src/logs/logger.service';
 import { EmailQueueService } from 'src/queues/services/email-queue.service';
 import { UserRolesRepository } from '../repos';
@@ -13,6 +16,7 @@ export class RolesManagementService implements IRolesManagementService {
     private readonly userRolesRepository: UserRolesRepository,
     private readonly emailQueueService: EmailQueueService,
     private readonly logger: LoggerService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async assignRoles(userId: string, roles: UserRoles[]): Promise<void> {
@@ -39,6 +43,15 @@ export class RolesManagementService implements IRolesManagementService {
           userName: user.name,
           addedRoles: addedRoles,
         }),
+      });
+
+      this.eventEmitter.emit(NotificationEvents.Created, {
+        userId: user.id,
+        title: 'New Roles Assigned',
+        body: `You have been assigned new roles: ${addedRoles.join(', ')}`,
+        sourceType: NotificationSourceType.SYSTEM,
+        sourceId: user.id,
+        payload: { addedRoles },
       });
     } catch (error: unknown) {
       const err = error instanceof Error ? error : new Error(String(error));
@@ -80,6 +93,15 @@ export class RolesManagementService implements IRolesManagementService {
           userName: user.name,
           removedRoles: roles,
         }),
+      });
+
+      this.eventEmitter.emit(NotificationEvents.Created, {
+        userId: user.id,
+        title: 'Roles Removed',
+        body: `Some of your roles have been removed: ${roles.join(', ')}`,
+        sourceType: NotificationSourceType.SYSTEM,
+        sourceId: user.id,
+        payload: { removedRoles: roles },
       });
     } catch (error: unknown) {
       const err = error instanceof Error ? error : new Error(String(error));

@@ -11,11 +11,11 @@ export class NotificationsService implements INotificationsService {
     private readonly logger: LoggerService,
   ) {}
 
-  createNotification(
+  async createNotification(
     notification: Partial<INotification>,
   ): Promise<INotification> {
     try {
-      return this.notificationRepository.createNotification(notification);
+      return await this.notificationRepository.createNotification(notification);
     } catch (error) {
       this.logger.error(
         'Failed to create notification',

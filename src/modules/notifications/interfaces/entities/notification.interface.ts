@@ -1,3 +1,4 @@
+import { NotificationSourceType } from 'src/common/consts/notification-source-type';
 import { NotificationChannel } from '../../entities/notification.entity';
 
 export interface INotification {
@@ -13,7 +14,7 @@ export interface INotification {
 
   channel: NotificationChannel;
 
-  sourceType: string | null;
+  sourceType: NotificationSourceType | null;
 
   sourceId: string | null;
 
