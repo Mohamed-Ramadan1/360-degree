@@ -35,6 +35,26 @@ export class HabitProcessor extends WorkerHost implements OnModuleDestroy {
   async process(job: Job<any, any, string>): Promise<void> {
     this.logger.log(`Processing habit job ${job.id} of type ${job.data.type}`);
     try {
+      const nextTriggerAt = this.timezoneService.calculateNextTriggerAt(
+        {
+          recurrenceType: job.data.recurrenceType,
+          time: job.data.time,
+          days: job.data.days,
+          dayOfMonth: job.data.dayOfMonth,
+          endDate: job.data.endDate,
+        },
+        job.data.timezone,
+      );
+
+      if (nextTriggerAt) {
+        await this.habitRepo.update(job.data.habitId, { nextTriggerAt });
+      } else {
+        await this.habitRepo.update(job.data.habitId, {
+          isActive: false,
+          nextTriggerAt: null,
+        });
+      }
+
       await this.emailQueueService.addEmailJob({
         type: 'habit-email',
         to: job.data.userEmail,
@@ -60,33 +80,8 @@ export class HabitProcessor extends WorkerHost implements OnModuleDestroy {
           scheduledTime: job.data.time,
         },
       });
-
-      const nextTriggerAt = this.timezoneService.calculateNextTriggerAt(
-        {
-          recurrenceType: job.data.recurrenceType,
-          time: job.data.time,
-          days: job.data.days,
-          dayOfMonth: job.data.dayOfMonth,
-          endDate: job.data.endDate,
-        },
-        job.data.timezone,
-      );
-      console.log(`Calculated nextTriggerAt`, nextTriggerAt);
-      console.log(`Job data endDate`, job.data.endDate);
-      if (nextTriggerAt) {
-        await this.habitRepo.update(job.data.habitId, { nextTriggerAt });
-        return;
-      }
-
-      await this.habitRepo.update(job.data.habitId, {
-        isActive: false,
-        nextTriggerAt: null,
-      });
     } catch (error) {
-      this.logger.error(
-        `Failed to process habit job ${job.id}:`,
-        error.message,
-      );
+      this.logger.error(`Failed to process habit job ${job.id}:`, error);
     }
   }
 

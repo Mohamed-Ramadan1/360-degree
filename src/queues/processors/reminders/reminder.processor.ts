@@ -35,6 +35,8 @@ export class ReminderProcessor extends WorkerHost implements OnModuleDestroy {
       `Processing reminder job ${job.id} of type ${job.data.type}`,
     );
     try {
+      await this.reminderRepo.markAsSent(job.data.reminderId);
+
       await this.emailQueueService.addEmailJob({
         type: 'reminder-email',
         to: job.data.userEmail,
@@ -61,8 +63,6 @@ export class ReminderProcessor extends WorkerHost implements OnModuleDestroy {
           reminderAt: job.data.reminderAt,
         },
       });
-
-      await this.reminderRepo.markAsSent(job.data.reminderId);
     } catch (error) {
       this.logger.error(`Failed to process reminder job ${job.id}:`, error);
     }
