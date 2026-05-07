@@ -3,6 +3,7 @@ import { TodoPriority } from 'src/common/consts';
 export interface BaseReminderJob {
   type: string;
   reminderId: string;
+  userId: string;
   userEmail: string;
   userName: string;
   todoTitle: string;

@@ -29,9 +29,12 @@ export class ReminderRepository {
         id: true,
         reminderAt: true,
         todo: {
+          id: true,
           title: true,
           dueDate: true,
+          priority: true,
           owner: {
+            id: true,
             email: true,
             name: true,
           },

@@ -26,6 +26,7 @@ export class HabitScheduler implements OnModuleInit {
         this.habitQueueService.addHabitJob({
           type: 'send-habit-reminder',
           habitId: habit.id,
+          userId: habit.owner.id,
           userEmail: habit.owner.email,
           userName: habit.owner.name,
           habitTitle: habit.title,

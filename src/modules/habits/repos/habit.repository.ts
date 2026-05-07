@@ -44,6 +44,7 @@ export class HabitRepository implements IHabitRepository {
         'habit.dayOfMonth',
         'habit.endDate',
         'habit.nextTriggerAt',
+        'owner.id',
         'owner.email',
         'owner.name',
         'owner.timezone',

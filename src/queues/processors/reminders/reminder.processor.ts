@@ -4,6 +4,9 @@ import { Job } from 'bullmq';
 import { LoggerService } from 'src/logs/logger.service';
 import { generateTodoReminderEmail } from 'src/modules/todos/emails/templates/reminderTodoEmail';
 import { ReminderRepository } from 'src/modules/todos/repos/reminder.repo';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NotificationSourceType } from 'src/common/consts/notification-source-type';
+import { NotificationEvents } from 'src/modules/notifications/events/names/notification-events.constants';
 import { EmailQueueService } from 'src/queues';
 import { QueueNames } from 'src/queues/config/queue-names.enum';
 import { BaseReminderJob } from 'src/queues/types/reminder-job.types';
@@ -13,6 +16,7 @@ export class ReminderProcessor extends WorkerHost implements OnModuleDestroy {
   constructor(
     private readonly emailQueueService: EmailQueueService,
     private readonly reminderRepo: ReminderRepository,
+    private readonly eventEmitter: EventEmitter2,
     private readonly logger: LoggerService,
   ) {
     super();
@@ -26,7 +30,7 @@ export class ReminderProcessor extends WorkerHost implements OnModuleDestroy {
     }
   }
 
-  async process(job: Job<any, any, string>): Promise<void> {
+  async process(job: Job<BaseReminderJob, unknown, string>): Promise<void> {
     this.logger.log(
       `Processing reminder job ${job.id} of type ${job.data.type}`,
     );
@@ -44,12 +48,23 @@ export class ReminderProcessor extends WorkerHost implements OnModuleDestroy {
           todoId: job.data.todoId,
         }),
       });
+
+      this.eventEmitter.emit(NotificationEvents.Created, {
+        userId: job.data.userId,
+        title: `Reminder: ${job.data.todoTitle}`,
+        body: `Don't forget to complete your task: ${job.data.todoTitle}`,
+        sourceType: NotificationSourceType.TODOS,
+        sourceId: job.data.todoId,
+        payload: {
+          reminderId: job.data.reminderId,
+          todoId: job.data.todoId,
+          reminderAt: job.data.reminderAt,
+        },
+      });
+
       await this.reminderRepo.markAsSent(job.data.reminderId);
     } catch (error) {
-      this.logger.error(
-        `Failed to process reminder job ${job.id}:`,
-        error.message,
-      );
+      this.logger.error(`Failed to process reminder job ${job.id}:`, error);
     }
   }
 

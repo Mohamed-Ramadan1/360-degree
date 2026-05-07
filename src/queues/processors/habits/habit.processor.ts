@@ -1,10 +1,13 @@
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { OnModuleDestroy } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Job } from 'bullmq';
+import { NotificationSourceType } from 'src/common/consts/notification-source-type';
 import { TimezoneService } from 'src/common/services/timezone.service';
 import { LoggerService } from 'src/logs/logger.service';
 import { generateHabitReminderEmail } from 'src/modules/habits/emails/templates/habitReminderEmail';
 import { HabitRepository } from 'src/modules/habits/repos/habit.repository';
+import { NotificationEvents } from 'src/modules/notifications/events/names/notification-events.constants';
 import { EmailQueueService } from 'src/queues';
 import { QueueNames } from 'src/queues/config/queue-names.enum';
 import { BaseHabitJob } from 'src/queues/types/habit-job.type';
@@ -15,6 +18,7 @@ export class HabitProcessor extends WorkerHost implements OnModuleDestroy {
     private readonly emailQueueService: EmailQueueService,
     private readonly habitRepo: HabitRepository,
     private readonly timezoneService: TimezoneService,
+    private readonly eventEmitter: EventEmitter2,
     private readonly logger: LoggerService,
   ) {
     super();
@@ -31,18 +35,31 @@ export class HabitProcessor extends WorkerHost implements OnModuleDestroy {
   async process(job: Job<any, any, string>): Promise<void> {
     this.logger.log(`Processing habit job ${job.id} of type ${job.data.type}`);
     try {
-      // await this.emailQueueService.addEmailJob({
-      //   type: 'habit-email',
-      //   to: job.data.userEmail,
-      //   subject: `Habit Reminder: ${job.data.habitTitle}`,
-      //   text: `Don't forget to complete your habit: ${job.data.habitTitle}`,
-      //   html: generateHabitReminderEmail({
-      //     userName: job.data.userName,
-      //     habitTitle: job.data.habitTitle,
-      //     habitAt: job.data.time,
-      //     habitId: job.data.habitId,
-      //   }),
-      // });
+      await this.emailQueueService.addEmailJob({
+        type: 'habit-email',
+        to: job.data.userEmail,
+        subject: `Habit Reminder: ${job.data.habitTitle}`,
+        text: `Don't forget to complete your habit: ${job.data.habitTitle}`,
+        html: generateHabitReminderEmail({
+          userName: job.data.userName,
+          habitTitle: job.data.habitTitle,
+          habitAt: job.data.time,
+          habitId: job.data.habitId,
+        }),
+      });
+
+      this.eventEmitter.emit(NotificationEvents.Created, {
+        userId: job.data.userId,
+        title: `Habit Reminder: ${job.data.habitTitle}`,
+        body: `Don't forget to complete your habit: ${job.data.habitTitle}`,
+        sourceType: NotificationSourceType.HABITS,
+        sourceId: job.data.habitId,
+        payload: {
+          habitId: job.data.habitId,
+          recurrenceType: job.data.recurrenceType,
+          scheduledTime: job.data.time,
+        },
+      });
 
       const nextTriggerAt = this.timezoneService.calculateNextTriggerAt(
         {

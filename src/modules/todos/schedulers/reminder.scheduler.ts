@@ -27,6 +27,7 @@ export class ReminderScheduler implements OnModuleInit {
         this.reminderQueueService.addReminderJob({
           type: 'send-reminder',
           reminderId: reminder.id,
+          userId: reminder.todo.owner.id,
           userEmail: reminder.todo.owner.email,
           userName: reminder.todo.owner.name,
           todoTitle: reminder.todo.title,
